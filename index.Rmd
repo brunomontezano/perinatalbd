@@ -22,7 +22,8 @@ nascimento coordenada pelo Centro de Epidemiologia da Universidade Federal
 de Pelotas intitulada "Coorte de 1993".
 
 ```{r}
-dados <- haven::read_dta("data/coorte_1993.dta")
+# Carrega dados da Coorte de 1993
+dados_coorte <- haven::read_sav("data/banco_QI_15_07.sav")
 ```
 
 ## Transtorno bipolar
@@ -33,66 +34,42 @@ diagnósticos do DSM-IV. Serão calculados diagnósticos de transtorno
 bipolar tipo I, transtorno bipolar tipo II e transtorno bipolar não
 especificado.
 
-### Criação das variáveis de episódio de humor
+### Criação das variáveis de episódio de humor e filtragem para reter variáveis perinatais
 
 ```{r}
-dados <- dados |>
-    dplyr::mutate(
-        ep_hipo =  ifelse(((kmini23 + kmini24 + kmini25 + kmini26 + kmini27 +
-                                kmini28 + kmini29 > 2) |
-                               (kmini19 == 0 | kmini20 == 0) &
-                               (kmini23 + kmini24 + kmini25 + kmini26 +
-                                    kmini27 + kmini28 + kmini29 > 3)
-        ) &
-            ((
-                kmini30 == 0 | kmini32 == 0
-            ) &
-                kmini31 == 0),
-        1, 0),
-        ep_mania = ifelse(((kmini23 + kmini24 + kmini25 + kmini26 + kmini27 +
-                                kmini28 + kmini29 > 2) |
-                               (kmini19 == 0 | kmini20 == 0) &
-                               (kmini23 + kmini24 + kmini25 + kmini26 +
-                                    kmini27 + kmini28 + kmini29 > 3)
-        ) &
-            ((
-                kmini30 == 1 & kmini32 == 1
-            ) | kmini31 == 1),
-        1, 0),
-        ep_dep = ifelse(((((kmini1 == 1 |
-                                kmini2 == 1) &
-                               (kmini3 + kmini4 + kmini5 + kmini6 + kmini7 + kmini8 + kmini9) > 2
-        )) |
-            ((kmini1 == 0 |
-                  kmini2 == 0) &
-                 (kmini3 + kmini4 + kmini5 + kmini6 + kmini7 + kmini8 + kmini9 > 3)
-            )) | (kmini10 == 1 & kmini11 == 1), 1, 0),
-    )
+# Vetor com as variáveis perinatais indicadas pela pesquisadora para
+# construção de novas features
+vars_vanessa <- c("apartip", "ainduz", "aprobrn", "aerrado",
+"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
+"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
+"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
+"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
+"ahipert", "adiabet", "ainfecur", "aoutinf",
+"aanemia", "amotcesa", "apartind", "afumou",
+"acompfum", "abebalc", "aalcool", "avivmar",
+"asexrn", "apesorn", "acompr", "apcrn", "aescol3",
+"aescpai", "aparid4", "aapoio", "aidam20",
+"aidam34", "apretamam", "aapgar1", "aapgar5")
+
+# Filtrar base para manter subamostra da avaliação aos 22 anos
+# Transformar variáveis com rótulos em variáveis tipo fator
+# Criar subconjunto com variável diagnóstico e variáveis perinatais
+da <- dados_coorte |> 
+    dplyr::filter(!is.na(TB_final)) |> 
+    haven::as_factor() |> 
+    dplyr::select(TB_final, dplyr::any_of(vars_vanessa))
 ```
 
 ### Criação do diagnóstico de TB
 
-Além da criação de variável de TB, a base de dados será filtrada para manter
+Além da manutenção de variável de TB, a base de dados foi filtrada para manter
 somente os sujeitos avaliados aos 22 anos (através da filtragem por meio de uma
-variável da MINI da avaliação em 2015).
+variável de diagnóstico da doença da avaliação em 2015).
 
 ```{r}
-dados <- dados |> 
-    dplyr::mutate(
-        tb = as.factor(
-            dplyr::case_when(
-                (ep_mania == 1) | (ep_dep == 1 & ep_hipo == 1) ~ "TB",
-                TRUE ~ "Controle"
-            )
-        )
-    ) |>
-    dplyr::filter(!is.na(l063))
-```
-
-```{r}
-dados |> 
-    dplyr::count(tb) |> 
-    ggplot2::ggplot(ggplot2::aes(x = tb, y = n)) +
+da |> 
+    dplyr::count(TB_final) |> 
+    ggplot2::ggplot(ggplot2::aes(x = TB_final, y = n)) +
     ggplot2::geom_col(fill = "royalblue") +
     ggplot2::geom_text(ggplot2::aes(label = n), vjust = -0.5, size = 5) +
     ggnuplot::theme_gnuplot(base_size = 20) +
@@ -110,95 +87,167 @@ dados |>
 # calcular qui-quadrado e teste t para as variáveis (talvez uma função para rodar mann-whitney, avaliar necessidade)
 # modelos multivariados (reg logistica)
 
-# Vetor com as variáveis indicadas pela Vanessa
-vars_vanessa <- c("apartip", "ainduz", "aprobrn", "aerrado",
-"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
-"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
-"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
-"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
-"ahipert", "adiabet", "ainfecur", "aoutinf",
-"aanemia", "amotcesar", "apartindu", "afumou",
-"acompfumo", "qualquer", "aalcool", "avivmar",
-"asexrn", "apesorn", "acompr", "apcrn", "aescol3",
-"aescpai", "aparid4", "aapoio", "aidam20",
-"aidam34", "apretamam", "aapgar1", "aapgar5")
-
-dados_diego <- haven::read_sav("data/banco_QI_15_07.sav")
-
-da <- dados_diego |> 
-    dplyr::filter(!is.na(TB_final)) |> 
-    haven::as_factor() |> 
-    dplyr::mutate(
-        tb_final = ifelse(TB_final == 1, "TB", "Sem TB")
-    ) |> 
-    dplyr::select(tb_final, dplyr::any_of(vars_vanessa))
-
-da |> 
-    dplyr::mutate(
-        cesarea = as.factor(ifelse(apartip == "normal", "Não", "Sim")),
-        parto_induzido = as.factor(
-            ifelse(ainduz %in% c("rompeu bolsa", "soro", "ambos"),
-                        "Sim", "Não")),
-        uti_neo = as.factor(ifelse(aprobrn %in% c("bercario", "aloj.conjunto"),
-                         "Não",
-                         ifelse(aprobrn == "uti", "Sim", NA_character_))),
+da_proc <- da |>
+    dplyr::transmute(
+        tb_dic = as.factor(dplyr::if_else(TB_final == 1,
+                                         "Sim",
+                                         "Não"
+                                         )
+                           ),
+        cesarea = as.factor(dplyr::if_else(apartip == "normal",
+                                           "Não",
+                                           "Sim"
+                                           )
+                            ),
+        parto_induzido = as.factor(dplyr::if_else(
+            ainduz %in% c("rompeu bolsa", "soro", "ambos"),
+            "Sim",
+            "Não"
+        )),
+        uti_neo = as.factor(dplyr::if_else(
+            aprobrn %in% c("bercario", "aloj.conjunto"),
+            "Não",
+            dplyr::if_else(aprobrn == "uti", "Sim",
+                           NA_character_
+                           )
+        )),
         prematuro = as.factor(
-            ifelse(aerrado != "prematuro" | is.na(aerrado),
-                   "Não",
-                   "Sim")),
+            dplyr::if_else(aerrado != "prematuro" | is.na(aerrado),
+                           "Não",
+                           "Sim"
+                           )
+        ),
         traumatismo = as.factor(
             dplyr::if_else(
                 aprobrn1 == "traumatismo" | aprobrn2 == "traumatismo" |
-                aprobrn3 == "traumatismo",
+                    aprobrn3 == "traumatismo",
                 "Sim",
                 "Não",
-                missing = "Não traumatismo")),
+                missing = "Não"
+            )
+        ),
         disf_resp = as.factor(
             dplyr::if_else(
                 aprobrn1 == "stress resp" | aprobrn2 == "stress resp" |
-                aprobrn3 == "stress resp",
+                    aprobrn3 == "stress resp",
                 "Sim",
                 "Não",
-                missing = "Não")),
+                missing = "Não"
+            )
+        ),
         malform = as.factor(
             dplyr::if_else(
                 aprobrn1 == "malformacao" | aprobrn2 == "malformacao" |
-                aprobrn3 == "malformacao",
+                    aprobrn3 == "malformacao",
                 "Sim",
                 "Não",
-                missing = "Não")),
+                missing = "Não"
+            )
+        ),
         sofrfetal = as.factor(
             dplyr::if_else(
                 aprobrn1 == "sofrim fetal" | aprobrn2 == "sofrim fetal" |
-                aprobrn3 == "sofrim fetal",
+                    aprobrn3 == "sofrim fetal",
                 "Sim",
                 "Não",
-                missing = "Não")),
-        has_materna = ifelse(
+                missing = "Não"
+            )
+        ),
+        has_materna = as.factor(dplyr::if_else(
             ahipert %in% c("tratado", "nao tratado"),
             "Sim",
             "Não"
-        ),
-        dm_materna = ifelse(
+        )),
+        dm_materna = as.factor(dplyr::if_else(
             adiabet %in% c("tratado", "nao tratado"),
             "Sim",
             "Não"
+        )),
+        infec_gest = as.factor(
+            dplyr::if_else(
+                ainfecur %in% c("tratado", "nao tratado") |
+                    aoutinf %in% c("tratado", "nao tratado"),
+                "Sim",
+                "Não"
+            )
         ),
-        infec_gest = dplyr::if_else(
-            ainfecur %in% c("tratado", "nao tratado") |
-            aoutinf %in% c("tratado", "nao tratado"),
-            "Sim",
-            "Não",
-            missing = "Não"
-        ),
-        anemia_gest = dplyr::if_else(
+        anemia_gest = as.factor(dplyr::if_else(
             aanemia %in% c("tratado", "nao tratado"),
             "Sim",
-            "Não",
-            missing = "Não"
-        )
-    ) |> 
-    dplyr::count(anemia_gest)
+            "Não"
+        )),
+        hemorr_parto = as.factor(
+            dplyr::if_else(
+                amotcesa == "hemorragia materna" | apartind == "sangramento",
+                "Sim",
+                "Não"
+            )
+        ),
+        tab_gest = as.factor(
+            dplyr::if_else(afumou == "sim",
+                           "Sim",
+                           "Não"
+                           )
+        ),
+        tab_pass_gest = as.factor(
+            dplyr::if_else(acompfum == "sim",
+                           "Sim",
+                           "Não"
+                           )
+        ),
+        etil_pesado_gest = as.factor(
+            dplyr::if_else(abebalc == "sim",
+                           "Sim",
+                           "Não"
+                           )
+        ),
+        rup_famil = as.factor(
+            dplyr::if_else(avivmar == "sim",
+                           "Não",
+                           "Sim"
+                           )
+        ),
+       baixo_peso = as.factor(
+           dplyr::if_else(apesorn < 2500,
+                          "Sim",
+                          "Não"
+                          )
+       ),
+       baixo_comp = as.factor(
+           dplyr::if_else(acompr < 47,
+                          "Sim",
+                          "Não"
+                          )
+       ),
+       per_cef_curto = as.factor(
+           dplyr::if_else(apcrn < 33,
+                          "Sim",
+                          "Não"
+                          )
+       ),
+       baixa_escol_paterna = as.factor(
+           dplyr::if_else(
+               aescpai <= 3,
+               "Sim",
+               "Não"
+           )
+       )
+    )
+
+# Checar valores ausentes após criação das variáveis propostas
+da_proc |> 
+    purrr::map(table, useNA = "always")
+
+# Criar base com variáveis imputadas pela moda
+da_imp <- da_proc |> 
+    recipes::recipe(tb_dic ~ .) |> 
+    recipes::step_impute_mode(recipes::all_nominal_predictors()) |> 
+    recipes::prep() |> 
+    recipes::bake(new_data = NULL)
+
+# Checar que a imputação funcionou
+da_imp |> 
+    purrr::map(table, useNA = "always")
 ```
 
 
