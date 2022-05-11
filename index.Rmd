@@ -1,0 +1,102 @@
+---
+title: "Fatores perinatais e desenvolvimento de transtorno bipolar"
+author: "Bruno Montezano"
+date: "`r Sys.Date()`"
+lang: "pt-br"
+output:
+    html_document:
+        theme: "united"
+        highlight: "zenburn"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=12, fig.height=8)
+```
+
+## Introdução
+
+O presente trabalho almeja observar os efeitos de fatores perinatais e do
+aleitamento materno no desenvolvimento de transtorno bipolar (TB) aos 22 anos
+de idade. Os dados utilizados para tal foram coletados em uma coorte de
+nascimento coordenada pelo Centro de Epidemiologia da Universidade Federal
+de Pelotas intitulada "Coorte de 1993".
+
+```{r}
+dados <- haven::read_dta("data/coorte_1993.dta")
+```
+
+## Transtorno bipolar
+
+O diagnóstico de transtorno bipolar será calculado pela MINI
+(Mini International Neuropsychiatric Interview) por meio dos critérios
+diagnósticos do DSM-IV. Serão calculados diagnósticos de transtorno
+bipolar tipo I, transtorno bipolar tipo II e transtorno bipolar não
+especificado.
+
+### Criação das variáveis de episódio de humor
+
+```{r}
+dados <- dados |>
+    dplyr::mutate(
+        ep_hipo =  ifelse(((kmini23 + kmini24 + kmini25 + kmini26 + kmini27 +
+                                kmini28 + kmini29 > 2) |
+                               (kmini19 == 0 | kmini20 == 0) &
+                               (kmini23 + kmini24 + kmini25 + kmini26 +
+                                    kmini27 + kmini28 + kmini29 > 3)
+        ) &
+            ((
+                kmini30 == 0 | kmini32 == 0
+            ) &
+                kmini31 == 0),
+        1, 0),
+        ep_mania = ifelse(((kmini23 + kmini24 + kmini25 + kmini26 + kmini27 +
+                                kmini28 + kmini29 > 2) |
+                               (kmini19 == 0 | kmini20 == 0) &
+                               (kmini23 + kmini24 + kmini25 + kmini26 +
+                                    kmini27 + kmini28 + kmini29 > 3)
+        ) &
+            ((
+                kmini30 == 1 & kmini32 == 1
+            ) | kmini31 == 1),
+        1, 0),
+        ep_dep = ifelse(((((kmini1 == 1 |
+                                kmini2 == 1) &
+                               (kmini3 + kmini4 + kmini5 + kmini6 + kmini7 + kmini8 + kmini9) > 2
+        )) |
+            ((kmini1 == 0 |
+                  kmini2 == 0) &
+                 (kmini3 + kmini4 + kmini5 + kmini6 + kmini7 + kmini8 + kmini9 > 3)
+            )) | (kmini10 == 1 & kmini11 == 1), 1, 0),
+    )
+```
+
+### Criação do diagnóstico de TB
+
+Além da criação de variável de TB, a base de dados será filtrada para manter
+somente os sujeitos avaliados aos 22 anos (através da filtragem por meio de uma
+variável da MINI da avaliação em 2015).
+
+```{r}
+dados <- dados |> 
+    dplyr::mutate(
+        tb = as.factor(
+            dplyr::case_when(
+                (ep_mania == 1) | (ep_dep == 1 & ep_hipo == 1) ~ "TB",
+                TRUE ~ "Controle"
+            )
+        )
+    ) |>
+    dplyr::filter(!is.na(l063))
+```
+
+```{r}
+dados |> 
+    dplyr::count(tb) |> 
+    ggplot2::ggplot(ggplot2::aes(x = tb, y = n)) +
+    ggplot2::geom_col(fill = "royalblue") +
+    ggplot2::geom_text(ggplot2::aes(label = n), vjust = -0.5, size = 5) +
+    ggnuplot::theme_gnuplot(base_size = 20) +
+    ggplot2::labs(x = "Diagnóstico", y = "Número de sujeitos")
+```
+
+
