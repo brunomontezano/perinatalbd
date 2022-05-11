@@ -101,7 +101,7 @@ dados |>
 
 ## Fatores perinatais e transtorno bipolar
 
-### Análise bivariada
+### Construção de variáveis
 
 ```{r}
 # TODO na quarta 11/05
@@ -116,71 +116,93 @@ vars_vanessa <- c("apartip", "ainduz", "aprobrn", "aerrado",
 "aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
 "aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
 "aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
-"ahipert", "adiabet", "ainfecuri", "aoutinf",
+"ahipert", "adiabet", "ainfecur", "aoutinf",
 "aanemia", "amotcesar", "apartindu", "afumou",
 "acompfumo", "qualquer", "aalcool", "avivmar",
 "asexrn", "apesorn", "acompr", "apcrn", "aescol3",
 "aescpai", "aparid4", "aapoio", "aidam20",
 "aidam34", "apretamam", "aapgar1", "aapgar5")
 
-# Pega dados do período perinatal
-dados_peri <- dados |> 
-    dplyr::select(tb, dplyr::starts_with("a")) |> 
-    haven::as_factor()
+dados_diego <- haven::read_sav("data/banco_QI_15_07.sav")
 
-# Selecionar TB e variáveis sugeridas pela Vanessa
-dados_vanessa <- dados_peri |> 
-    dplyr::select(tb, dplyr::one_of(vars_vanessa))
+da <- dados_diego |> 
+    dplyr::filter(!is.na(TB_final)) |> 
+    haven::as_factor() |> 
+    dplyr::mutate(
+        tb_final = ifelse(TB_final == 1, "TB", "Sem TB")
+    ) |> 
+    dplyr::select(tb_final, dplyr::any_of(vars_vanessa))
 
-# Dar um look nas variáveis categóricas
-dados_vanessa |> 
-    purrr::keep(is.factor) |> 
-    purrr::map(table, useNA = "always")
-
-# Verificar frequễncia fumar na gravidez/TB
-dados_vanessa |> 
-    dplyr::group_by(afumou) |> 
-    dplyr::count(tb) |> 
-    dplyr::mutate(perc = n/sum(n))
-
-# Para usar .$var
-library(magrittr, include.only = "%>%")
-
-# Troubleshooting no problema do qui-quadrado
-dados_peri |> 
-    purrr::keep(is.factor) |> 
-    purrr::map(droplevels) |> 
-    purrr::map(levels) |> 
-    purrr::keep(\(x) length(x) < 2)
-
-# Rodar qui-quadrado para todas categóricas
-dados_peri %>%
-    dplyr::select(-aruptur, -azona) |> 
-    purrr::keep(is.factor) %>%
-    purrr::keep(\(x) length(levels(x)) == 2) |> 
-    tidyr::pivot_longer(names_to = "variable", values_to = "value", -tb) %>%
-    dplyr::group_by(variable) %>%
-    dplyr::do(chisq.test(.$tb, .$value, simulate.p.value = TRUE) %>%
-                  broom::tidy()
-              )
-
-# Pegar nomes das variáveis perinatais categóricas
-fatores <- dados_peri |> 
-    purrr::keep(is.factor) |> 
-    names()
-
-# Inventar moda com essa função
-rodar_chi <- function(variavel) {
-    valor_p <- chisq.test(x = dados_peri[, variavel],
-                          y = dados_peri$tb)$p.value
-    
-}
-
-# Testando com duas variáveis
-# Se fosse usar realmente, colocar o ID (nome da var) de alguma forma
-purrr::map(c("apartip", "adiasem"), rodar_chi)
-    
+da |> 
+    dplyr::mutate(
+        cesarea = as.factor(ifelse(apartip == "normal", "Não", "Sim")),
+        parto_induzido = as.factor(
+            ifelse(ainduz %in% c("rompeu bolsa", "soro", "ambos"),
+                        "Sim", "Não")),
+        uti_neo = as.factor(ifelse(aprobrn %in% c("bercario", "aloj.conjunto"),
+                         "Não",
+                         ifelse(aprobrn == "uti", "Sim", NA_character_))),
+        prematuro = as.factor(
+            ifelse(aerrado != "prematuro" | is.na(aerrado),
+                   "Não",
+                   "Sim")),
+        traumatismo = as.factor(
+            dplyr::if_else(
+                aprobrn1 == "traumatismo" | aprobrn2 == "traumatismo" |
+                aprobrn3 == "traumatismo",
+                "Sim",
+                "Não",
+                missing = "Não traumatismo")),
+        disf_resp = as.factor(
+            dplyr::if_else(
+                aprobrn1 == "stress resp" | aprobrn2 == "stress resp" |
+                aprobrn3 == "stress resp",
+                "Sim",
+                "Não",
+                missing = "Não")),
+        malform = as.factor(
+            dplyr::if_else(
+                aprobrn1 == "malformacao" | aprobrn2 == "malformacao" |
+                aprobrn3 == "malformacao",
+                "Sim",
+                "Não",
+                missing = "Não")),
+        sofrfetal = as.factor(
+            dplyr::if_else(
+                aprobrn1 == "sofrim fetal" | aprobrn2 == "sofrim fetal" |
+                aprobrn3 == "sofrim fetal",
+                "Sim",
+                "Não",
+                missing = "Não")),
+        has_materna = ifelse(
+            ahipert %in% c("tratado", "nao tratado"),
+            "Sim",
+            "Não"
+        ),
+        dm_materna = ifelse(
+            adiabet %in% c("tratado", "nao tratado"),
+            "Sim",
+            "Não"
+        ),
+        infec_gest = dplyr::if_else(
+            ainfecur %in% c("tratado", "nao tratado") |
+            aoutinf %in% c("tratado", "nao tratado"),
+            "Sim",
+            "Não",
+            missing = "Não"
+        ),
+        anemia_gest = dplyr::if_else(
+            aanemia %in% c("tratado", "nao tratado"),
+            "Sim",
+            "Não",
+            missing = "Não"
+        )
+    ) |> 
+    dplyr::count(anemia_gest)
 ```
+
+
+
 
 
 
