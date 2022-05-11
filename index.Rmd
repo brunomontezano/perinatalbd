@@ -245,6 +245,8 @@ da_imp <- da_proc |>
     recipes::prep() |> 
     recipes::bake(new_data = NULL)
 
+da_imp
+
 # Checar que a imputação funcionou
 da_imp |> 
     purrr::map(table, useNA = "always")
