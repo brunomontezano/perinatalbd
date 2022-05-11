@@ -99,4 +99,88 @@ dados |>
     ggplot2::labs(x = "Diagnóstico", y = "Número de sujeitos")
 ```
 
+## Fatores perinatais e transtorno bipolar
+
+### Análise bivariada
+
+```{r}
+# TODO na quarta 11/05
+# checar variáveis da Vanessa e limpar a base
+# calcular variáveis que a Vanessa propos no Google Docs
+# calcular qui-quadrado e teste t para as variáveis (talvez uma função para rodar mann-whitney, avaliar necessidade)
+# modelos multivariados (reg logistica)
+
+# Vetor com as variáveis indicadas pela Vanessa
+vars_vanessa <- c("apartip", "ainduz", "aprobrn", "aerrado",
+"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
+"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
+"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
+"aprobrn", "aprobrn1", "aprobrn2", "aprobrn3",
+"ahipert", "adiabet", "ainfecuri", "aoutinf",
+"aanemia", "amotcesar", "apartindu", "afumou",
+"acompfumo", "qualquer", "aalcool", "avivmar",
+"asexrn", "apesorn", "acompr", "apcrn", "aescol3",
+"aescpai", "aparid4", "aapoio", "aidam20",
+"aidam34", "apretamam", "aapgar1", "aapgar5")
+
+# Pega dados do período perinatal
+dados_peri <- dados |> 
+    dplyr::select(tb, dplyr::starts_with("a")) |> 
+    haven::as_factor()
+
+# Selecionar TB e variáveis sugeridas pela Vanessa
+dados_vanessa <- dados_peri |> 
+    dplyr::select(tb, dplyr::one_of(vars_vanessa))
+
+# Dar um look nas variáveis categóricas
+dados_vanessa |> 
+    purrr::keep(is.factor) |> 
+    purrr::map(table, useNA = "always")
+
+# Verificar frequễncia fumar na gravidez/TB
+dados_vanessa |> 
+    dplyr::group_by(afumou) |> 
+    dplyr::count(tb) |> 
+    dplyr::mutate(perc = n/sum(n))
+
+# Para usar .$var
+library(magrittr, include.only = "%>%")
+
+# Troubleshooting no problema do qui-quadrado
+dados_peri |> 
+    purrr::keep(is.factor) |> 
+    purrr::map(droplevels) |> 
+    purrr::map(levels) |> 
+    purrr::keep(\(x) length(x) < 2)
+
+# Rodar qui-quadrado para todas categóricas
+dados_peri %>%
+    dplyr::select(-aruptur, -azona) |> 
+    purrr::keep(is.factor) %>%
+    purrr::keep(\(x) length(levels(x)) == 2) |> 
+    tidyr::pivot_longer(names_to = "variable", values_to = "value", -tb) %>%
+    dplyr::group_by(variable) %>%
+    dplyr::do(chisq.test(.$tb, .$value, simulate.p.value = TRUE) %>%
+                  broom::tidy()
+              )
+
+# Pegar nomes das variáveis perinatais categóricas
+fatores <- dados_peri |> 
+    purrr::keep(is.factor) |> 
+    names()
+
+# Inventar moda com essa função
+rodar_chi <- function(variavel) {
+    valor_p <- chisq.test(x = dados_peri[, variavel],
+                          y = dados_peri$tb)$p.value
+    
+}
+
+# Testando com duas variáveis
+# Se fosse usar realmente, colocar o ID (nome da var) de alguma forma
+purrr::map(c("apartip", "adiasem"), rodar_chi)
+    
+```
+
+
 
