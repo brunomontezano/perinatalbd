@@ -48,8 +48,9 @@ vars_vanessa <- c("apartip", "ainduz", "aprobrn", "aerrado",
 "aanemia", "amotcesa", "apartind", "afumou",
 "acompfum", "abebalc", "aalcool", "avivmar",
 "asexrn", "apesorn", "acompr", "apcrn", "aescol3",
-"aescpai", "aparid4", "aapoio", "aidam20",
-"aidam34", "apretamam", "aapgar1", "aapgar5")
+"aescpai", "aparidad", "aapoio", "aidadmae",
+"aidadpai", "apretama", "aapgar1", "aapgar5",
+"arenfam")
 
 # Filtrar base para manter subamostra da avaliação aos 22 anos
 # Transformar variáveis com rótulos em variáveis tipo fator
@@ -231,50 +232,75 @@ da_proc <- da |>
                "Sim",
                "Não"
            )
-       )
+       ),
+       paridade_4_ou_mais = as.factor(
+           dplyr::if_else(
+               aparidad %in% c("0", "1", "2", "3"),
+               "Não",
+               "Sim"
+           )
+       ),
+       apoio_familiar = as.factor(
+           dplyr::if_else(
+               aapoio == "sim",
+               "Sim",
+               "Não"
+           )
+       ),
+       idade_mae_20 = as.factor(
+           dplyr::if_else(
+               aidadmae < 20,
+               "Menor que 20",
+               "Maior ou igual a 20"
+           )
+       ),
+       idade_mae_34 = as.factor(
+           dplyr::if_else(
+               aidadmae < 34,
+               "Menor que 34",
+               "Maior ou igual que 34"
+           )
+       ),
+       pretende_amamentar = as.factor(
+           dplyr::if_else(
+               apretama == "sim",
+               "Sim",
+               "Não"
+           )
+       ),
+       apgar_1 = as.factor(
+           dplyr::if_else(
+               aapgar1 < 7,
+               "Menor que 7",
+               "Maior ou igual a 7"
+           )
+       ),
+       apgar_5 = as.factor(
+           dplyr::if_else(
+               aapgar5 < 7,
+               "Menor que 7",
+               "Maior ou igual a 7"
+           )
+       ),
+       renda_familiar = arenfam
     )
 
 # Checar valores ausentes após criação das variáveis propostas
 da_proc |> 
-    purrr::map(table, useNA = "always")
+    purrr::map_if(is.factor, \(x) table(x, useNA = "always"), .else = summary)
 
-# Criar base com variáveis imputadas pela moda
+# Criar base com variáveis imputadas pela moda e média
 da_imp <- da_proc |> 
     recipes::recipe(tb_dic ~ .) |> 
     recipes::step_impute_mode(recipes::all_nominal_predictors()) |> 
+    recipes::step_impute_mean(recipes::all_numeric_predictors()) |> 
     recipes::prep() |> 
     recipes::bake(new_data = NULL)
 
-da_imp
-
 # Checar que a imputação funcionou
 da_imp |> 
-    purrr::map(table, useNA = "always")
+    purrr::map_if(is.factor, \(x) table(x, useNA = "always"), .else = summary)
 ```
-
-```{r}
-# PACOTES DV
-# c("usethis", "apaTables", "arsenal", "AUC", "baguette", "basedosdados",
-#   "bookdown", "blogdown", "pkgdown", "butcher", "caret", "cloudml",
-#   "curl", "rvest", "xml2", "data.table", "devtools", "doFuture",
-#   "doParallel", "flexdashboard", "shiny", "GGally", "ggmice",
-#   "golem", "gt", "gtsummary", "here", "kableExtra", "latex2exp",
-#   "lme4", "mice", "officedown", "officer", "pdftools", "plotly",
-#   "plotROC", "plumber", "pROC", "Rcpp", "readxl", "reporttools",
-#   "scales", "semPlot", "semTable", "shinydashboard", "shinyWidgets",
-#   "stargazer", "survival", "testthat", "themis", "tidytuesdayR",
-#   "torchdatasets", "torchaudio", "torchvision", "visdat", "xtable",
-#   "xaringan", "xaringanExtra", "workboots", "vetiver", "usemodels",
-#   "tufte", "tinytex", "stopwords", "SHAPforxgboost", "rticles",
-#   "rpart", "ROSE", "renv", "readODS", "qpdf", "prettyunits", "pdp",
-#   "patchwork", "naivebayes", "mediation", "metasens", "luz", "lime",
-#   "leaflet", "keras", "tensorflow", "httr", "googlesheets4",
-#   "googledrive", "ggimage", "ggeffects", "gbm", "future", "fs",
-#   "foreign", "feather", "Epi", "epitools", "corrplot", "beepr",
-#   "bayesm", "bayesplot", "BayesFactor", "abjutils")
-```
-
-
 
 
 
