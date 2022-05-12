@@ -88,7 +88,7 @@ da_proc <- da |>
                                          "Sim",
                                          "Não"
                                          ),
-                        levels = c("Sim", "Não")
+                        levels = c("Não", "Sim")
                            ),
         cesarea = as.factor(dplyr::if_else(apartip == "normal",
                                            "Não",
@@ -309,8 +309,7 @@ cat_biv <- da_imp |>
     dplyr::do(chisq.test(.$tb_dic, .$value, simulate.p.value = TRUE) |>
                   broom::tidy()) |> 
     dplyr::select(-c(parameter, method)) |> 
-    dplyr::filter(p.value < 0.05) |> 
-    tibble::view()
+    dplyr::filter(p.value < 0.05)
 
 knitr::kable(cat_biv)
 ```
@@ -323,8 +322,7 @@ num_biv <- da_imp |>
     tidyr::pivot_longer(names_to = "variable", values_to = "value", -tb_dic) |>
     dplyr::group_by(variable) %>%
     dplyr::do(t.test(.$value ~ .$tb_dic) |>
-                  broom::tidy()) |> 
-    tibble::view()
+                  broom::tidy())
 
 knitr::kable(num_biv)
 ```
@@ -351,6 +349,31 @@ resumo_fit <- mod_fit |>
     )
 
 knitr::kable(resumo_fit)
+```
+
+#### Plot com OR
+
+```{r, warning = FALSE}
+mod_fit |> 
+    broom::tidy() |> 
+    dplyr::transmute(
+        variavel = term,
+        or = exp(estimate),
+        erro_padrao = std.error
+        ) |> 
+    dplyr::filter(variavel != "(Intercept)" & or < 10) |> 
+    ggplot2::ggplot() +
+    ggplot2::aes(x = or, y = variavel) +
+    ggplot2::geom_point(size = 5, color = "royalblue") +
+    ggplot2::geom_linerange(
+        ggplot2::aes(xmin = or-erro_padrao, xmax = or+erro_padrao),
+        color = "royalblue",
+        size = 0.8) +
+    ggplot2::geom_vline(xintercept = 1) +
+    ggplot2::scale_x_continuous(limits = c(0, 2.5)) +
+    ggplot2::labs(x = "Razão de chances", y = "Variável") +
+    ggnuplot::theme_gnuplot(base_size = 15)
+    
 ```
 
 
