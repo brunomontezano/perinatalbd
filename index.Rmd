@@ -67,6 +67,9 @@ Além da manutenção de variável de TB, a base de dados foi filtrada para mant
 somente os sujeitos avaliados aos 22 anos (através da filtragem por meio de uma
 variável de diagnóstico da doença da avaliação em 2015).
 
+Abaixo, segue um gráfico de barras com a proporção de bipolares e não-bipolares
+na amostra:
+
 ```{r}
 da |> 
     dplyr::count(TB_final) |> 
@@ -80,6 +83,40 @@ da |>
 ## Fatores perinatais e transtorno bipolar
 
 ### Construção de variáveis e técnicas de imputação
+
+As seguintes variáveis foram construídas:
+
+- `tb_dic`: Diagnóstico de TB tipo I ou TB tipo II (dicotômica)
+- `cesarea`: O parto foi cesária?
+- `parto_induzido`: A bolsa rompeu, foi utilizado soro ou ambas as coisas?
+- `uti_neo`: O recém-nascido foi para UTI?
+- `prematuro`: O bebê nasceu prematuro?
+- `traumatismo`: O bebê apresentou
+traumatismo no parto?
+- `disf_resp`: O bebê apresentou disfunção respiratória no parto?
+- `malform`: Apresentou malformação no parto?
+- `sofrfetal`: Apresentou sofrimento fetal?
+- `has_materna`: Hipertensão arterial materna
+- `dm_materna`: Diabetes materna
+- `ifec_gest`: Infecção gestacional
+- `anemia_gest`: Anemia gestacional
+- `hemorr_parto`: Apresentou hemorragia no parto
+- `tab_gest`: Fumou na gestação
+- `tab_pass_gest`: Fumo passivo na gestação
+- `etil_pesado_gest`: Etilismo pesado na gestação
+- `rup_famil`: Ruptura familiar
+- `baixo_peso`: Baixo peso ao nascer
+- `baixo_comp`: Baixo comprimento ao nascer
+- `perf_cef_curto`: Perímetro cefálico curto
+- `baixa_escol_paterna`: Baixa escolaridade paterna (<= 3 anos de estudo)
+- `paridade_4_ou_mais`: Paridade (dicotômica)
+- `apoio_familiar`: Teve apoio da famíla/vizinhos/amigos?
+- `idade_mae_20`: Idade da mãe (< 20 anos)
+- `idade_mae_34`: Idade da mãe (< 34 anos)
+- `pretende_amamentar`: Mãe pretende amamentar
+- `apgar_1`: Apgar no minuto 1 (menor que 7)
+- `apgar_5`: Apgar no minuto 5 (menor que 7)
+- `renda_familiar`: Renda familiar (em salários mínimos)
 
 ```{r}
 da_proc <- da |>
@@ -279,7 +316,17 @@ da_proc <- da |>
        ),
        renda_familiar = arenfam
     )
+```
 
+Nesta etapa abaixo, realizou-se uma
+checagem em relação aos valores ausentes
+em cada uma das variáveis. Posteriormente,
+elaborou-se um pequeno fluxo para realizar
+a imputação das variáveis por meio de média
+(variáveis numéricas) e moda (variáveis
+categóricas).
+
+```{r}
 # Checar valores ausentes após criação das variáveis propostas
 da_proc |> 
     purrr::map_if(is.factor, \(x) table(x, useNA = "always"), .else = summary)
@@ -373,7 +420,6 @@ mod_fit |>
     ggplot2::scale_x_continuous(limits = c(0, 2.5)) +
     ggplot2::labs(x = "Razão de chances", y = "Variável") +
     ggnuplot::theme_gnuplot(base_size = 15)
-    
 ```
 
 
