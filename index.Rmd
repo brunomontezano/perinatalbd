@@ -81,9 +81,9 @@ da |>
 ### Construção de variáveis
 
 ```{r}
-# TODO na quarta 11/05
-# checar variáveis da Vanessa e limpar a base
-# calcular variáveis que a Vanessa propos no Google Docs
+# TODO na quinta 12/05
+# checar variáveis da Vanessa e limpar a base (DONE)
+# calcular variáveis que a Vanessa propos no Google Docs (IN PROGRESS)
 # calcular qui-quadrado e teste t para as variáveis (talvez uma função para rodar mann-whitney, avaliar necessidade)
 # modelos multivariados (reg logistica)
 
@@ -248,6 +248,28 @@ da_imp <- da_proc |>
 # Checar que a imputação funcionou
 da_imp |> 
     purrr::map(table, useNA = "always")
+```
+
+```{r}
+# PACOTES DV
+# c("usethis", "apaTables", "arsenal", "AUC", "baguette", "basedosdados",
+#   "bookdown", "blogdown", "pkgdown", "butcher", "caret", "cloudml",
+#   "curl", "rvest", "xml2", "data.table", "devtools", "doFuture",
+#   "doParallel", "flexdashboard", "shiny", "GGally", "ggmice",
+#   "golem", "gt", "gtsummary", "here", "kableExtra", "latex2exp",
+#   "lme4", "mice", "officedown", "officer", "pdftools", "plotly",
+#   "plotROC", "plumber", "pROC", "Rcpp", "readxl", "reporttools",
+#   "scales", "semPlot", "semTable", "shinydashboard", "shinyWidgets",
+#   "stargazer", "survival", "testthat", "themis", "tidytuesdayR",
+#   "torchdatasets", "torchaudio", "torchvision", "visdat", "xtable",
+#   "xaringan", "xaringanExtra", "workboots", "vetiver", "usemodels",
+#   "tufte", "tinytex", "stopwords", "SHAPforxgboost", "rticles",
+#   "rpart", "ROSE", "renv", "readODS", "qpdf", "prettyunits", "pdp",
+#   "patchwork", "naivebayes", "mediation", "metasens", "luz", "lime",
+#   "leaflet", "keras", "tensorflow", "httr", "googlesheets4",
+#   "googledrive", "ggimage", "ggeffects", "gbm", "future", "fs",
+#   "foreign", "feather", "Epi", "epitools", "corrplot", "beepr",
+#   "bayesm", "bayesplot", "BayesFactor", "abjutils")
 ```
 
 
