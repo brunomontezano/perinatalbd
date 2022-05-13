@@ -343,6 +343,22 @@ da_imp |>
     purrr::map_if(is.factor, \(x) table(x, useNA = "always"), .else = summary)
 ```
 
+```{r}
+# Checar frequência agrupada pelo desfecho
+ver_freq <- function(var) {
+    
+    da_imp |> 
+        dplyr::group_by(tb_dic) |> 
+        dplyr::count({{ var }})
+    
+}
+
+da_imp |> 
+    dplyr::select(-renda_familiar) |> 
+    purrr::map_if(is.factor, ver_freq)
+```
+
+
 ### Análise bivariada com variáveis categóricas
 
 ```{r}
