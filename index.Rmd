@@ -31,8 +31,7 @@ dados_coorte <- haven::read_sav("data/banco_QI_15_07.sav")
 O diagnóstico de transtorno bipolar será calculado pela MINI
 (Mini International Neuropsychiatric Interview) por meio dos critérios
 diagnósticos do DSM-IV. Serão calculados diagnósticos de transtorno
-bipolar tipo I, transtorno bipolar tipo II e transtorno bipolar não
-especificado.
+bipolar tipo I e transtorno bipolar tipo II.
 
 ### Criação das variáveis de episódio de humor e filtragem para reter variáveis perinatais
 
