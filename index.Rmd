@@ -370,8 +370,7 @@ cat_biv <- da_imp |>
     dplyr::group_by(variable) %>%
     dplyr::do(chisq.test(.$tb_dic, .$value, simulate.p.value = TRUE) |>
                   broom::tidy()) |> 
-    dplyr::select(-c(parameter, method)) |> 
-    dplyr::filter(p.value < 0.05)
+    dplyr::select(-c(parameter, method))
 
 knitr::kable(cat_biv)
 ```
@@ -405,7 +404,6 @@ mod_fit <- mod |>
 
 resumo_fit <- mod_fit |> 
     broom::tidy() |> 
-    dplyr::filter(p.value < 0.05) |> 
     dplyr::mutate(
         or = exp(estimate)
     )
@@ -423,7 +421,9 @@ mod_fit |>
         or = exp(estimate),
         erro_padrao = std.error
         ) |> 
-    dplyr::filter(variavel != "(Intercept)" & or < 10) |> 
+    dplyr::filter(
+        variavel != "(Intercept)" & or < 10 & or > 0.5
+        ) |> 
     ggplot2::ggplot() +
     ggplot2::aes(x = or, y = variavel) +
     ggplot2::geom_point(size = 5, color = "royalblue") +
