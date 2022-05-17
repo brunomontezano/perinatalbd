@@ -323,7 +323,7 @@ da_proc <- da |>
 
 Nesta etapa abaixo, realizou-se uma checagem em relação aos valores
 ausentes em cada uma das variáveis. Posteriormente, elaborou-se um
-pequeno fluxo para realizar a imputação das variáveis por meio de média
+pequeno fluxo para realizar a imputação das variáveis por meio de mediana
 (variáveis numéricas) e moda (variáveis categóricas).
 
 ```{r}
@@ -331,11 +331,11 @@ pequeno fluxo para realizar a imputação das variáveis por meio de média
 da_proc |> 
     purrr::map_if(is.factor, \(x) table(x, useNA = "always"), .else = summary)
 
-# Criar base com variáveis imputadas pela moda e média
+# Criar base com variáveis imputadas pela moda e mediana
 da_imp <- da_proc |> 
     recipes::recipe(tb_dic ~ .) |> 
     recipes::step_impute_mode(recipes::all_nominal_predictors()) |> 
-    recipes::step_impute_mean(recipes::all_numeric_predictors()) |> 
+    recipes::step_impute_median(recipes::all_numeric_predictors()) |> 
     recipes::prep() |> 
     recipes::bake(new_data = NULL)
 
