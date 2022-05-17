@@ -7,6 +7,9 @@ output:
     html_document:
         theme: "united"
         highlight: "zenburn"
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -15,11 +18,11 @@ knitr::opts_chunk$set(echo = TRUE, fig.width=12, fig.height=8)
 
 ## Introdução
 
-O presente trabalho almeja observar os efeitos de fatores perinatais e do
-aleitamento materno no desenvolvimento de transtorno bipolar (TB) aos 22 anos
-de idade. Os dados utilizados para tal foram coletados em uma coorte de
-nascimento coordenada pelo Centro de Epidemiologia da Universidade Federal
-de Pelotas intitulada "Coorte de 1993".
+O presente trabalho almeja observar os efeitos de fatores perinatais e
+do aleitamento materno no desenvolvimento de transtorno bipolar (TB) aos
+22 anos de idade. Os dados utilizados para tal foram coletados em uma
+coorte de nascimento coordenada pelo Centro de Epidemiologia da
+Universidade Federal de Pelotas intitulada "Coorte de 1993".
 
 ```{r}
 # Carrega dados da Coorte de 1993
@@ -28,8 +31,8 @@ dados_coorte <- haven::read_sav("data/banco_QI_15_07.sav")
 
 ## Transtorno bipolar
 
-O diagnóstico de transtorno bipolar será calculado pela MINI
-(Mini International Neuropsychiatric Interview) por meio dos critérios
+O diagnóstico de transtorno bipolar será calculado pela MINI (Mini
+International Neuropsychiatric Interview) por meio dos critérios
 diagnósticos do DSM-IV. Serão calculados diagnósticos de transtorno
 bipolar tipo I e transtorno bipolar tipo II.
 
@@ -62,12 +65,12 @@ da <- dados_coorte |>
 
 ### Criação do diagnóstico de TB
 
-Além da manutenção de variável de TB, a base de dados foi filtrada para manter
-somente os sujeitos avaliados aos 22 anos (através da filtragem por meio de uma
-variável de diagnóstico da doença da avaliação em 2015).
+Além da manutenção de variável de TB, a base de dados foi filtrada para
+manter somente os sujeitos avaliados aos 22 anos (através da filtragem
+por meio de uma variável de diagnóstico da doença da avaliação em 2015).
 
-Abaixo, segue um gráfico de barras com a proporção de bipolares e não-bipolares
-na amostra:
+Abaixo, segue um gráfico de barras com a proporção de bipolares e
+não-bipolares na amostra:
 
 ```{r}
 da |> 
@@ -85,37 +88,38 @@ da |>
 
 As seguintes variáveis foram construídas:
 
-- `tb_dic`: Diagnóstico de TB tipo I ou TB tipo II (dicotômica)
-- `cesarea`: O parto foi cesária?
-- `parto_induzido`: A bolsa rompeu, foi utilizado soro ou ambas as coisas?
-- `uti_neo`: O recém-nascido foi para UTI?
-- `prematuro`: O bebê nasceu prematuro?
-- `traumatismo`: O bebê apresentou
-traumatismo no parto?
-- `disf_resp`: O bebê apresentou disfunção respiratória no parto?
-- `malform`: Apresentou malformação no parto?
-- `sofrfetal`: Apresentou sofrimento fetal?
-- `has_materna`: Hipertensão arterial materna
-- `dm_materna`: Diabetes materna
-- `ifec_gest`: Infecção gestacional
-- `anemia_gest`: Anemia gestacional
-- `hemorr_parto`: Apresentou hemorragia no parto
-- `tab_gest`: Fumou na gestação
-- `tab_pass_gest`: Fumo passivo na gestação
-- `etil_pesado_gest`: Etilismo pesado na gestação
-- `rup_famil`: Ruptura familiar
-- `baixo_peso`: Baixo peso ao nascer
-- `baixo_comp`: Baixo comprimento ao nascer
-- `perf_cef_curto`: Perímetro cefálico curto
-- `baixa_escol_paterna`: Baixa escolaridade paterna (<= 3 anos de estudo)
-- `paridade_4_ou_mais`: Paridade (dicotômica)
-- `apoio_familiar`: Teve apoio da famíla/vizinhos/amigos?
-- `idade_mae_20`: Idade da mãe (< 20 anos)
-- `idade_mae_34`: Idade da mãe (< 34 anos)
-- `pretende_amamentar`: Mãe pretende amamentar
-- `apgar_1`: Apgar no minuto 1 (menor que 7)
-- `apgar_5`: Apgar no minuto 5 (menor que 7)
-- `renda_familiar`: Renda familiar (em salários mínimos)
+-   `tb_dic`: Diagnóstico de TB tipo I ou TB tipo II (dicotômica)
+-   `cesarea`: O parto foi cesária?
+-   `parto_induzido`: A bolsa rompeu, foi utilizado soro ou ambas as
+    coisas?
+-   `uti_neo`: O recém-nascido foi para UTI?
+-   `prematuro`: O bebê nasceu prematuro?
+-   `traumatismo`: O bebê apresentou traumatismo no parto?
+-   `disf_resp`: O bebê apresentou disfunção respiratória no parto?
+-   `malform`: Apresentou malformação no parto?
+-   `sofrfetal`: Apresentou sofrimento fetal?
+-   `has_materna`: Hipertensão arterial materna
+-   `dm_materna`: Diabetes materna
+-   `ifec_gest`: Infecção gestacional
+-   `anemia_gest`: Anemia gestacional
+-   `hemorr_parto`: Apresentou hemorragia no parto
+-   `tab_gest`: Fumou na gestação
+-   `tab_pass_gest`: Fumo passivo na gestação
+-   `etil_pesado_gest`: Etilismo pesado na gestação
+-   `rup_famil`: Ruptura familiar
+-   `baixo_peso`: Baixo peso ao nascer
+-   `baixo_comp`: Baixo comprimento ao nascer
+-   `perf_cef_curto`: Perímetro cefálico curto
+-   `baixa_escol_paterna`: Baixa escolaridade paterna (\<= 3 anos de
+    estudo)
+-   `paridade_4_ou_mais`: Paridade (dicotômica)
+-   `apoio_familiar`: Teve apoio da famíla/vizinhos/amigos?
+-   `idade_mae_20`: Idade da mãe (\< 20 anos)
+-   `idade_mae_34`: Idade da mãe (\< 34 anos)
+-   `pretende_amamentar`: Mãe pretende amamentar
+-   `apgar_1`: Apgar no minuto 1 (menor que 7)
+-   `apgar_5`: Apgar no minuto 5 (menor que 7)
+-   `renda_familiar`: Renda familiar (em salários mínimos)
 
 ```{r}
 da_proc <- da |>
@@ -317,13 +321,10 @@ da_proc <- da |>
     )
 ```
 
-Nesta etapa abaixo, realizou-se uma
-checagem em relação aos valores ausentes
-em cada uma das variáveis. Posteriormente,
-elaborou-se um pequeno fluxo para realizar
-a imputação das variáveis por meio de média
-(variáveis numéricas) e moda (variáveis
-categóricas).
+Nesta etapa abaixo, realizou-se uma checagem em relação aos valores
+ausentes em cada uma das variáveis. Posteriormente, elaborou-se um
+pequeno fluxo para realizar a imputação das variáveis por meio de média
+(variáveis numéricas) e moda (variáveis categóricas).
 
 ```{r}
 # Checar valores ausentes após criação das variáveis propostas
@@ -358,7 +359,6 @@ da_imp |>
     purrr::map_if(is.factor, ver_freq)
 ```
 
-
 ### Análise bivariada com variáveis categóricas
 
 ```{r}
@@ -370,7 +370,8 @@ cat_biv <- da_imp |>
     dplyr::group_by(variable) %>%
     dplyr::do(chisq.test(.$tb_dic, .$value, simulate.p.value = TRUE) |>
                   broom::tidy()) |> 
-    dplyr::select(-c(parameter, method))
+    dplyr::select(-c(parameter, method)) |> 
+    dplyr::ungroup()
 
 knitr::kable(cat_biv)
 ```
@@ -383,16 +384,21 @@ num_biv <- da_imp |>
     tidyr::pivot_longer(names_to = "variable", values_to = "value", -tb_dic) |>
     dplyr::group_by(variable) %>%
     dplyr::do(t.test(.$value ~ .$tb_dic) |>
-                  broom::tidy())
+                  broom::tidy()) |> 
+    dplyr::ungroup()
 
 knitr::kable(num_biv)
 ```
 
 ### Análise multivariada
 
-A imputação foi realizada nos passos anteriores para a análise bivariada, logo, o
-objeto da base de dados imputada (pré-processada) será usada para o ajuste do modelo
-de regressão logística binomial.
+A imputação foi realizada nos passos anteriores para a análise
+bivariada, logo, o objeto da base de dados imputada (pré-processada)
+será usada para o ajuste do modelo de regressão logística binomial.
+
+Primeiramente foi elaborado um modelo multivariado com todas as
+variáveis, e logo na sequência, um modelo contendo somente as variáveis
+com valor *p* menor que 0,2 na análise bivariada.
 
 ```{r, warning = FALSE}
 mod <- parsnip::logistic_reg() |> 
@@ -437,6 +443,57 @@ mod_fit |>
     ggnuplot::theme_gnuplot(base_size = 15)
 ```
 
+#### Análise multivariada somente com variáveis com p \< 0,2 na análise bruta
 
+Neste modelo, foram incluídas somente as variáveis independentes que
+apresentaram um valor de p menor que 0,2 na análise bivariada.
 
+```{r}
+vars_multivar <- cat_biv |> 
+    dplyr::bind_rows(num_biv |> dplyr::select(variable, statistic, p.value)) |> 
+    dplyr::ungroup() |> 
+    dplyr::filter(p.value < 0.2) |> 
+    dplyr::pull(variable)
 
+add_outcome <- function(predictors) {
+    reg_mod <- paste0("tb_dic", " ~ ", predictors)
+    return(reg_mod)
+}
+
+mod_filtrado <- vars_multivar |> 
+    paste(collapse = " + ") |> 
+    add_outcome()
+
+mod_filtrado_fit <- mod |> 
+    parsnip::fit(as.formula(mod_filtrado), data = da_imp)
+
+mod_filtrado_fit |> 
+    broom::tidy() |> 
+    knitr::kable()
+```
+
+#### Plot com OR do modelo com p \< 0,2 na análise bivariada
+
+```{r, warning = FALSE}
+mod_filtrado_fit |> 
+    broom::tidy() |> 
+    dplyr::transmute(
+        variavel = term,
+        or = exp(estimate),
+        erro_padrao = std.error
+        ) |> 
+    dplyr::filter(
+        variavel != "(Intercept)" & or < 10 & or > 0.5
+        ) |> 
+    ggplot2::ggplot() +
+    ggplot2::aes(x = or, y = variavel) +
+    ggplot2::geom_point(size = 5, color = "royalblue") +
+    ggplot2::geom_linerange(
+        ggplot2::aes(xmin = or-erro_padrao, xmax = or+erro_padrao),
+        color = "royalblue",
+        size = 0.8) +
+    ggplot2::geom_vline(xintercept = 1) +
+    ggplot2::scale_x_continuous(limits = c(0, 2.5)) +
+    ggplot2::labs(x = "Razão de chances", y = "Variável") +
+    ggnuplot::theme_gnuplot(base_size = 15)
+```
