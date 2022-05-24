@@ -124,22 +124,26 @@ As seguintes variáveis foram construídas:
 ```{r}
 da_proc <- da |>
     dplyr::transmute(
+        # Desfecho: transtorno bipolar aos 22 anos
         tb_dic = factor(dplyr::if_else(TB_final == 1,
                                          "Sim",
                                          "Não"
                                          ),
                         levels = c("Não", "Sim")
                            ),
+        # Cesárea ou parto normal
         cesarea = as.factor(dplyr::if_else(apartip == "normal",
                                            "Não",
                                            "Sim"
                                            )
                             ),
+        # Parto induzido
         parto_induzido = as.factor(dplyr::if_else(
             ainduz %in% c("rompeu bolsa", "soro", "ambos"),
             "Sim",
             "Não"
         )),
+        # Ida a UTI
         uti_neo = as.factor(dplyr::if_else(
             aprobrn %in% c("bercario", "aloj.conjunto"),
             "Não",
@@ -147,12 +151,14 @@ da_proc <- da |>
                            NA_character_
                            )
         )),
+        # Nascimento prematuro
         prematuro = as.factor(
             dplyr::if_else(aerrado != "prematuro" | is.na(aerrado),
                            "Não",
                            "Sim"
                            )
         ),
+        # Traumatismo no parto
         traumatismo = as.factor(
             dplyr::if_else(
                 aprobrn1 == "traumatismo" | aprobrn2 == "traumatismo" |
@@ -189,11 +195,7 @@ da_proc <- da |>
                 missing = "Não"
             )
         ),
-        has_materna = as.factor(dplyr::if_else(
-            ahipert %in% c("tratado", "nao tratado"),
-            "Sim",
-            "Não"
-        )),
+        hipert_materna = relevel(ahipert, ref = "nao"),
         dm_materna = as.factor(dplyr::if_else(
             adiabet %in% c("tratado", "nao tratado"),
             "Sim",
@@ -255,12 +257,14 @@ da_proc <- da |>
                           "Não"
                           )
        ),
+       per_cef = apcrn,
        per_cef_curto = as.factor(
            dplyr::if_else(apcrn < 33,
                           "Sim",
                           "Não"
                           )
        ),
+       escol_paterna = aescpai,
        baixa_escol_paterna = as.factor(
            dplyr::if_else(
                aescpai <= 3,
@@ -282,6 +286,7 @@ da_proc <- da |>
                "Não"
            )
        ),
+       idade_mae_num = aidadmae,
        idade_mae_20 = as.factor(
            dplyr::if_else(
                aidadmae < 20,
@@ -303,14 +308,16 @@ da_proc <- da |>
                "Não"
            )
        ),
-       apgar_1 = as.factor(
+       apgar_1 = aapgar1,
+       apgar_5 = aapgar5,
+       apgar_1_dic = as.factor(
            dplyr::if_else(
                aapgar1 < 7,
                "Menor que 7",
                "Maior ou igual a 7"
            )
        ),
-       apgar_5 = as.factor(
+       apgar_5_dic = as.factor(
            dplyr::if_else(
                aapgar5 < 7,
                "Menor que 7",
@@ -334,6 +341,7 @@ da_proc |>
 # Criar base com variáveis imputadas pela moda e mediana
 da_imp <- da_proc |> 
     recipes::recipe(tb_dic ~ .) |> 
+    recipes::step_filter_missing(recipes::all_predictors(), threshold = 0.1) |> 
     recipes::step_impute_mode(recipes::all_nominal_predictors()) |> 
     recipes::step_impute_median(recipes::all_numeric_predictors()) |> 
     recipes::prep() |> 
@@ -355,8 +363,7 @@ ver_freq <- function(var) {
 }
 
 da_imp |> 
-    dplyr::select(-renda_familiar) |> 
-    purrr::map_if(is.factor, ver_freq)
+    purrr::map_if(is.factor, ver_freq, .else = summary)
 ```
 
 ### Análise bivariada com variáveis categóricas
@@ -396,57 +403,15 @@ A imputação foi realizada nos passos anteriores para a análise
 bivariada, logo, o objeto da base de dados imputada (pré-processada)
 será usada para o ajuste do modelo de regressão logística binomial.
 
-Primeiramente foi elaborado um modelo multivariado com todas as
-variáveis, e logo na sequência, um modelo contendo somente as variáveis
-com valor *p* menor que 0,2 na análise bivariada.
+Um modelo contendo somente as variáveis
+com valor *p* menor que 0,2 na análise bivariada foi construído.
 
-```{r, warning = FALSE}
-mod <- parsnip::logistic_reg() |> 
-    parsnip::set_mode("classification") |> 
-    parsnip::set_engine("glm")
+Os valores de odds ratio foram estimados a partir da equação $e^{\beta}$.
 
-mod_fit <- mod |> 
-    parsnip::fit(tb_dic ~ ., data = da_imp)
-
-resumo_fit <- mod_fit |> 
-    broom::tidy() |> 
-    dplyr::mutate(
-        or = exp(estimate)
-    )
-
-knitr::kable(resumo_fit)
-```
-
-#### Plot com OR
-
-```{r, warning = FALSE}
-mod_fit |> 
-    broom::tidy() |> 
-    dplyr::transmute(
-        variavel = term,
-        or = exp(estimate),
-        erro_padrao = std.error
-        ) |> 
-    dplyr::filter(
-        variavel != "(Intercept)" & or < 10 & or > 0.5
-        ) |> 
-    ggplot2::ggplot() +
-    ggplot2::aes(x = or, y = variavel) +
-    ggplot2::geom_point(size = 5, color = "royalblue") +
-    ggplot2::geom_linerange(
-        ggplot2::aes(xmin = or-erro_padrao, xmax = or+erro_padrao),
-        color = "royalblue",
-        size = 0.8) +
-    ggplot2::geom_vline(xintercept = 1) +
-    ggplot2::scale_x_continuous(limits = c(0, 2.5)) +
-    ggplot2::labs(x = "Razão de chances", y = "Variável") +
-    ggnuplot::theme_gnuplot(base_size = 15)
-```
-
-#### Análise multivariada somente com variáveis com p \< 0,2 na análise bruta
+#### Modelo de regressão logística binomial
 
 Neste modelo, foram incluídas somente as variáveis independentes que
-apresentaram um valor de p menor que 0,2 na análise bivariada.
+apresentaram um valor de p menor que 0,2 na análise bivariada (bruta).
 
 ```{r}
 vars_multivar <- cat_biv |> 
@@ -464,6 +429,10 @@ mod_filtrado <- vars_multivar |>
     paste(collapse = " + ") |> 
     add_outcome()
 
+mod <- parsnip::logistic_reg() |> 
+    parsnip::set_mode("classification") |> 
+    parsnip::set_engine("glm")
+
 mod_filtrado_fit <- mod |> 
     parsnip::fit(as.formula(mod_filtrado), data = da_imp)
 
@@ -474,26 +443,62 @@ mod_filtrado_fit |>
 
 #### Plot com OR do modelo com p \< 0,2 na análise bivariada
 
+Como pode ser observado na tabela acima, traumatismo no parto se mostrou como
+um fator de risco para o desenvolvimento de TB aos 22 anos, porém não está
+presente na figura abaixo por ter apresentado um odds ratio que ficaria muito
+fora dos limites do gráfico.
+
+Além disso, a variável de traumatismo no parto, como pode ser observado na tabela
+abaixo, apresentou um intervalo de confiança superior na razão de chances de 74,8.
+
 ```{r, warning = FALSE}
+set.seed(1)
+intervalos <- exp(confint(mod_filtrado_fit$fit)) |>
+    tibble::as_tibble(rownames = "term") |> 
+    janitor::clean_names()
+
 mod_filtrado_fit |> 
     broom::tidy() |> 
+    dplyr::left_join(intervalos, by = "term") |> 
     dplyr::transmute(
         variavel = term,
         or = exp(estimate),
-        erro_padrao = std.error
+        lower_int = x2_5_percent,
+        upper_int = x97_5_percent
+        )
+
+mod_filtrado_fit |> 
+    broom::tidy() |> 
+    dplyr::left_join(intervalos, by = "term") |> 
+    dplyr::transmute(
+        variavel = term,
+        or = exp(estimate),
+        upper_int = x97_5_percent,
+        lower_int = x2_5_percent
         ) |> 
     dplyr::filter(
-        variavel != "(Intercept)" & or < 10 & or > 0.5
+        variavel != "(Intercept)" & or < 9 & or > 0.5
         ) |> 
     ggplot2::ggplot() +
     ggplot2::aes(x = or, y = variavel) +
     ggplot2::geom_point(size = 5, color = "royalblue") +
     ggplot2::geom_linerange(
-        ggplot2::aes(xmin = or-erro_padrao, xmax = or+erro_padrao),
+        ggplot2::aes(xmin = lower_int, xmax = upper_int),
         color = "royalblue",
         size = 0.8) +
     ggplot2::geom_vline(xintercept = 1) +
-    ggplot2::scale_x_continuous(limits = c(0, 2.5)) +
+    ggplot2::scale_x_continuous(limits = c(0, 4)) +
+    ggplot2::scale_y_discrete(labels = c("Baixa escolaridade paterna",
+                                         "Baixo comprimento",
+                                         "Diabetes materna",
+                                         "Escolaridade paterna",
+                                         "Paridade (4 ou mais)",
+                                         "Perímetro cefálico",
+                                         "Renda familiar",
+                                         "Ruptura familiar",
+                                         "Tabagismo gestacional",
+                                         "Tabagismo passivo gestacional")) +
     ggplot2::labs(x = "Razão de chances", y = "Variável") +
-    ggnuplot::theme_gnuplot(base_size = 15)
+    ggnuplot::theme_gnuplot(base_size = 16)
 ```
+
