@@ -13,7 +13,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.width=12, fig.height=8)
+knitr::opts_chunk$set(echo = TRUE, fig.width=16, fig.height=9)
 ```
 
 ## Introdução
@@ -50,7 +50,7 @@ vars_vanessa <- c("apartip", "ainduz", "aprobrn", "aerrado",
 "aanemia", "amotcesa", "apartind", "afumou",
 "acompfum", "abebalc", "aalcool", "avivmar",
 "asexrn", "apesorn", "acompr", "apcrn", "aescol3",
-"aescpai", "aparidad", "aapoio", "aidadmae",
+"aescpai", "aescmae", "aparidad", "aapoio", "aidadmae",
 "aidadpai", "apretama", "aapgar1", "aapgar5",
 "arenfam")
 
@@ -103,8 +103,7 @@ As seguintes variáveis foram construídas:
 -   `ifec_gest`: Infecção gestacional
 -   `anemia_gest`: Anemia gestacional
 -   `hemorr_parto`: Apresentou hemorragia no parto
--   `tab_gest`: Fumou na gestação
--   `tab_pass_gest`: Fumo passivo na gestação
+-   `tab_gest`: Contato com tabagismo na gestação (ativo ou passivo)
 -   `etil_pesado_gest`: Etilismo pesado na gestação
 -   `rup_famil`: Ruptura familiar
 -   `baixo_peso`: Baixo peso ao nascer
@@ -222,13 +221,7 @@ da_proc <- da |>
             )
         ),
         tab_gest = as.factor(
-            dplyr::if_else(afumou == "sim",
-                           "Sim",
-                           "Não"
-                           )
-        ),
-        tab_pass_gest = as.factor(
-            dplyr::if_else(acompfum == "sim",
+            dplyr::if_else(afumou == "sim" | acompfum == "sim",
                            "Sim",
                            "Não"
                            )
@@ -265,20 +258,12 @@ da_proc <- da |>
                           )
        ),
        escol_paterna = aescpai,
-       baixa_escol_paterna = as.factor(
-           dplyr::if_else(
-               aescpai <= 3,
-               "Sim",
-               "Não"
-           )
-       ),
-       paridade_4_ou_mais = as.factor(
-           dplyr::if_else(
-               aparidad %in% c("0", "1", "2", "3"),
-               "Não",
-               "Sim"
-           )
-       ),
+       escol_materna = aescmae,
+       paridade = relevel(as.factor(dplyr::if_else(
+           aparidad %in% c("0", "1", "2", "3"),
+            "Menor que 4",
+            "Maior ou igual a 4")
+           ), ref = "Menor que 4"), 
        apoio_familiar = as.factor(
            dplyr::if_else(
                aapoio == "sim",
@@ -310,20 +295,6 @@ da_proc <- da |>
        ),
        apgar_1 = aapgar1,
        apgar_5 = aapgar5,
-       apgar_1_dic = as.factor(
-           dplyr::if_else(
-               aapgar1 < 7,
-               "Menor que 7",
-               "Maior ou igual a 7"
-           )
-       ),
-       apgar_5_dic = as.factor(
-           dplyr::if_else(
-               aapgar5 < 7,
-               "Menor que 7",
-               "Maior ou igual a 7"
-           )
-       ),
        renda_familiar = arenfam
     )
 ```
@@ -344,6 +315,7 @@ da_imp <- da_proc |>
     recipes::step_filter_missing(recipes::all_predictors(), threshold = 0.1) |> 
     recipes::step_impute_mode(recipes::all_nominal_predictors()) |> 
     recipes::step_impute_median(recipes::all_numeric_predictors()) |> 
+    recipes::step_nzv(recipes::all_predictors()) |> 
     recipes::prep() |> 
     recipes::bake(new_data = NULL)
 
@@ -487,17 +459,15 @@ mod_filtrado_fit |>
         color = "royalblue",
         size = 0.8) +
     ggplot2::geom_vline(xintercept = 1) +
-    ggplot2::scale_x_continuous(limits = c(0, 4)) +
-    ggplot2::scale_y_discrete(labels = c("Baixa escolaridade paterna",
-                                         "Baixo comprimento",
-                                         "Diabetes materna",
+    ggplot2::scale_x_continuous(limits = c(0, 3)) +
+    ggplot2::scale_y_discrete(labels = c("Baixo comprimento",
+                                         "Escolaridade materna",
                                          "Escolaridade paterna",
-                                         "Paridade (4 ou mais)",
+                                         "Paridade (maior que 4)",
                                          "Perímetro cefálico",
                                          "Renda familiar",
                                          "Ruptura familiar",
-                                         "Tabagismo gestacional",
-                                         "Tabagismo passivo gestacional")) +
+                                         "Tabagismo na gravidez")) +
     ggplot2::labs(x = "Razão de chances", y = "Variável") +
     ggnuplot::theme_gnuplot(base_size = 16)
 ```
