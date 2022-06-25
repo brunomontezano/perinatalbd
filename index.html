@@ -11,7 +11,7 @@
 
 <meta name="author" content="Bruno Montezano" />
 
-<meta name="date" content="2022-06-13" />
+<meta name="date" content="2022-06-25" />
 
 <title>Fatores perinatais e desenvolvimento de transtorno bipolar</title>
 
@@ -437,7 +437,7 @@ pre code {
 <h1 class="title toc-ignore">Fatores perinatais e desenvolvimento de
 transtorno bipolar</h1>
 <h4 class="author">Bruno Montezano</h4>
-<h4 class="date">2022-06-13</h4>
+<h4 class="date">2022-06-25</h4>
 
 </div>
 
@@ -514,16 +514,12 @@ não-bipolares na amostra:</p>
 <li><code>parto_induzido</code>: A bolsa rompeu, foi utilizado soro ou
 ambas as coisas?</li>
 <li><code>uti_neo</code>: O recém-nascido foi para UTI?</li>
-<li><code>prematuro</code>: O bebê nasceu prematuro?</li>
-<li><code>traumatismo</code>: O bebê apresentou traumatismo no
-parto?</li>
-<li><code>disf_resp</code>: O bebê apresentou disfunção respiratória no
-parto?</li>
-<li><code>malform</code>: Apresentou malformação no parto?</li>
-<li><code>sofrfetal</code>: Apresentou sofrimento fetal?</li>
-<li><code>has_materna</code>: Hipertensão arterial materna</li>
+<li><code>complicacoes</code>: Variáveis de prematuridade, traumatismo
+no parto, disfunção respiratória no parto, malformação no parto e
+sofrimento fetal agrupadas (através do operador OU)</li>
+<li><code>hipert_materna</code>: Hipertensão arterial materna</li>
 <li><code>dm_materna</code>: Diabetes materna</li>
-<li><code>ifec_gest</code>: Infecção gestacional</li>
+<li><code>infec_gest</code>: Infecção gestacional</li>
 <li><code>anemia_gest</code>: Anemia gestacional</li>
 <li><code>hemorr_parto</code>: Apresentou hemorragia no parto</li>
 <li><code>tab_gest</code>: Contato com tabagismo na gestação (ativo ou
@@ -532,20 +528,26 @@ passivo)</li>
 <li><code>rup_famil</code>: Ruptura familiar</li>
 <li><code>baixo_peso</code>: Baixo peso ao nascer</li>
 <li><code>baixo_comp</code>: Baixo comprimento ao nascer</li>
-<li><code>perf_cef_curto</code>: Perímetro cefálico curto</li>
-<li><code>baixa_escol_paterna</code>: Baixa escolaridade paterna (&lt;=
-3 anos de estudo)</li>
-<li><code>paridade_4_ou_mais</code>: Paridade (dicotômica)</li>
+<li><code>per_cef</code>: Perímetro cefálico (numérico)</li>
+<li><code>escol_paterna</code>: Escolaridade paterna</li>
+<li><code>escol_materna</code>: Escolaridade materna</li>
+<li><code>paridade</code>: Paridade (dicotômica) [4 ou mais e menos que
+4]</li>
 <li><code>apoio_familiar</code>: Teve apoio da
 famíla/vizinhos/amigos?</li>
+<li><code>idade_mae_num</code>: Idade da mãe (numérica)</li>
 <li><code>idade_mae_20</code>: Idade da mãe (&lt; 20 anos)</li>
 <li><code>idade_mae_34</code>: Idade da mãe (&lt; 34 anos)</li>
 <li><code>pretende_amamentar</code>: Mãe pretende amamentar</li>
-<li><code>apgar_1</code>: Apgar no minuto 1 (menor que 7)</li>
-<li><code>apgar_5</code>: Apgar no minuto 5 (menor que 7)</li>
+<li><code>apgar_1</code>: Apgar no minuto 1 (escore bruto)</li>
+<li><code>apgar_5</code>: Apgar no minuto 5 (escore bruto)</li>
 <li><code>renda_familiar</code>: Renda familiar (em salários
 mínimos)</li>
 </ul>
+<p>As variáveis de idade materna foram utilizadas através das três
+codificações pois os autores consideraram a hipótese da relação da idade
+com o desfecho não ser puramente linear. Dessa forma, esta foi uma forma
+na qual se pensou uma maneira de considerar possível associação.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>da_proc <span class="ot">&lt;-</span> da <span class="sc">|&gt;</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Desfecho: transtorno bipolar aos 22 anos</span></span>
@@ -881,19 +883,33 @@ mediana (variáveis numéricas) e moda (variáveis categóricas).</p>
 ## $renda_familiar
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
 ##   0.000   1.500   2.800   4.422   4.900  88.200      66</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar base com variáveis imputadas pela moda e mediana</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>da_imp <span class="ot">&lt;-</span> da_proc <span class="sc">|&gt;</span> </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">recipe</span>(tb_dic <span class="sc">~</span> .) <span class="sc">|&gt;</span> </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">step_filter_missing</span>(recipes<span class="sc">::</span><span class="fu">all_predictors</span>(), <span class="at">threshold =</span> <span class="fl">0.1</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">step_impute_mode</span>(recipes<span class="sc">::</span><span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">step_impute_median</span>(recipes<span class="sc">::</span><span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">step_nzv</span>(recipes<span class="sc">::</span><span class="fu">all_predictors</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">prep</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">bake</span>(<span class="at">new_data =</span> <span class="cn">NULL</span>)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Checar que a imputação funcionou</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>da_imp <span class="sc">|&gt;</span> </span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">map_if</span>(is.factor, \(x) <span class="fu">table</span>(x, <span class="at">useNA =</span> <span class="st">&quot;always&quot;</span>), <span class="at">.else =</span> summary)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Agrupar variáveis de complicações perinatais</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>da_proc <span class="ot">&lt;-</span> da_proc <span class="sc">|&gt;</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">complicacoes =</span> <span class="fu">as.factor</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">if_else</span>(</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                prematuro <span class="sc">==</span> <span class="st">&quot;Sim&quot;</span> <span class="sc">|</span> traumatismo <span class="sc">==</span> <span class="st">&quot;Sim&quot;</span> <span class="sc">|</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                disf_resp <span class="sc">==</span> <span class="st">&quot;Sim&quot;</span> <span class="sc">|</span> malform <span class="sc">==</span> <span class="st">&quot;Sim&quot;</span> <span class="sc">|</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                sofrfetal <span class="sc">==</span> <span class="st">&quot;Sim&quot;</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Sim&quot;</span>, <span class="st">&quot;Não&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">.keep =</span> <span class="st">&quot;unused&quot;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar base com variáveis imputadas pela moda e mediana</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>da_imp <span class="ot">&lt;-</span> da_proc <span class="sc">|&gt;</span> </span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">recipe</span>(tb_dic <span class="sc">~</span> .) <span class="sc">|&gt;</span> </span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">step_filter_missing</span>(recipes<span class="sc">::</span><span class="fu">all_predictors</span>(), <span class="at">threshold =</span> <span class="fl">0.1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">step_impute_mode</span>(recipes<span class="sc">::</span><span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">step_impute_median</span>(recipes<span class="sc">::</span><span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">step_nzv</span>(recipes<span class="sc">::</span><span class="fu">all_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">prep</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    recipes<span class="sc">::</span><span class="fu">bake</span>(<span class="at">new_data =</span> <span class="cn">NULL</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Checar que a imputação funcionou</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>da_imp <span class="sc">|&gt;</span> </span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">map_if</span>(is.factor, \(x) <span class="fu">table</span>(x, <span class="at">useNA =</span> <span class="st">&quot;always&quot;</span>), <span class="at">.else =</span> summary)</span></code></pre></div>
 <pre><code>## $cesarea
 ## x
 ##  Não  Sim &lt;NA&gt; 
@@ -1210,27 +1226,27 @@ mediana (variáveis numéricas) e moda (variáveis categóricas).</p>
 <tr class="odd">
 <td align="left">anemia_gest</td>
 <td align="right">0.7216101</td>
-<td align="right">0.4022989</td>
+<td align="right">0.3833083</td>
 </tr>
 <tr class="even">
 <td align="left">apoio_familiar</td>
 <td align="right">0.3633418</td>
-<td align="right">0.5792104</td>
+<td align="right">0.5852074</td>
 </tr>
 <tr class="odd">
 <td align="left">baixo_comp</td>
 <td align="right">2.1964328</td>
-<td align="right">0.1799100</td>
+<td align="right">0.1729135</td>
 </tr>
 <tr class="even">
 <td align="left">baixo_peso</td>
 <td align="right">1.3138025</td>
-<td align="right">0.2358821</td>
+<td align="right">0.2498751</td>
 </tr>
 <tr class="odd">
 <td align="left">cesarea</td>
 <td align="right">0.2806900</td>
-<td align="right">0.6066967</td>
+<td align="right">0.5897051</td>
 </tr>
 <tr class="even">
 <td align="left">etil_pesado_gest</td>
@@ -1240,42 +1256,42 @@ mediana (variáveis numéricas) e moda (variáveis categóricas).</p>
 <tr class="odd">
 <td align="left">hipert_materna</td>
 <td align="right">1.9776026</td>
-<td align="right">0.3473263</td>
+<td align="right">0.3628186</td>
 </tr>
 <tr class="even">
 <td align="left">idade_mae_20</td>
 <td align="right">0.6829833</td>
-<td align="right">0.4617691</td>
+<td align="right">0.4522739</td>
 </tr>
 <tr class="odd">
 <td align="left">idade_mae_34</td>
 <td align="right">0.0175648</td>
-<td align="right">0.9065467</td>
+<td align="right">0.9070465</td>
 </tr>
 <tr class="even">
 <td align="left">infec_gest</td>
 <td align="right">0.5115060</td>
-<td align="right">0.5187406</td>
+<td align="right">0.5067466</td>
 </tr>
 <tr class="odd">
 <td align="left">paridade</td>
 <td align="right">8.4323910</td>
-<td align="right">0.0034983</td>
+<td align="right">0.0054973</td>
 </tr>
 <tr class="even">
 <td align="left">parto_induzido</td>
 <td align="right">0.1599856</td>
-<td align="right">0.7196402</td>
+<td align="right">0.7231384</td>
 </tr>
 <tr class="odd">
 <td align="left">per_cef_curto</td>
 <td align="right">0.8884443</td>
-<td align="right">0.3838081</td>
+<td align="right">0.3933033</td>
 </tr>
 <tr class="even">
 <td align="left">rup_famil</td>
 <td align="right">5.0731873</td>
-<td align="right">0.0234883</td>
+<td align="right">0.0304848</td>
 </tr>
 <tr class="odd">
 <td align="left">tab_gest</td>

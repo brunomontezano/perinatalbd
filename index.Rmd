@@ -93,14 +93,11 @@ As seguintes variáveis foram construídas:
 -   `parto_induzido`: A bolsa rompeu, foi utilizado soro ou ambas as
     coisas?
 -   `uti_neo`: O recém-nascido foi para UTI?
--   `prematuro`: O bebê nasceu prematuro?
--   `traumatismo`: O bebê apresentou traumatismo no parto?
--   `disf_resp`: O bebê apresentou disfunção respiratória no parto?
--   `malform`: Apresentou malformação no parto?
--   `sofrfetal`: Apresentou sofrimento fetal?
--   `has_materna`: Hipertensão arterial materna
+- `complicacoes`: Variáveis de prematuridade, traumatismo no parto,
+disfunção respiratória no parto, malformação no parto e sofrimento fetal agrupadas (através do operador OU)
+-   `hipert_materna`: Hipertensão arterial materna
 -   `dm_materna`: Diabetes materna
--   `ifec_gest`: Infecção gestacional
+-   `infec_gest`: Infecção gestacional
 -   `anemia_gest`: Anemia gestacional
 -   `hemorr_parto`: Apresentou hemorragia no parto
 -   `tab_gest`: Contato com tabagismo na gestação (ativo ou passivo)
@@ -108,17 +105,23 @@ As seguintes variáveis foram construídas:
 -   `rup_famil`: Ruptura familiar
 -   `baixo_peso`: Baixo peso ao nascer
 -   `baixo_comp`: Baixo comprimento ao nascer
--   `perf_cef_curto`: Perímetro cefálico curto
--   `baixa_escol_paterna`: Baixa escolaridade paterna (\<= 3 anos de
-    estudo)
--   `paridade_4_ou_mais`: Paridade (dicotômica)
+-   `per_cef`: Perímetro cefálico (numérico)
+-   `escol_paterna`: Escolaridade paterna
+-   `escol_materna`: Escolaridade materna
+-   `paridade`: Paridade (dicotômica) [4 ou mais e menos que 4]
 -   `apoio_familiar`: Teve apoio da famíla/vizinhos/amigos?
+-   `idade_mae_num`: Idade da mãe (numérica)
 -   `idade_mae_20`: Idade da mãe (\< 20 anos)
 -   `idade_mae_34`: Idade da mãe (\< 34 anos)
 -   `pretende_amamentar`: Mãe pretende amamentar
--   `apgar_1`: Apgar no minuto 1 (menor que 7)
--   `apgar_5`: Apgar no minuto 5 (menor que 7)
+-   `apgar_1`: Apgar no minuto 1 (escore bruto)
+-   `apgar_5`: Apgar no minuto 5 (escore bruto)
 -   `renda_familiar`: Renda familiar (em salários mínimos)
+
+As variáveis de idade materna foram utilizadas através das três codificações
+pois os autores consideraram a hipótese da relação da idade com o desfecho não
+ser puramente linear. Dessa forma, esta foi uma forma na qual se pensou uma
+maneira de considerar possível associação.
 
 ```{r}
 da_proc <- da |>
@@ -308,6 +311,20 @@ pequeno fluxo para realizar a imputação das variáveis por meio de mediana
 # Checar valores ausentes após criação das variáveis propostas
 da_proc |> 
     purrr::map_if(is.factor, \(x) table(x, useNA = "always"), .else = summary)
+
+# Agrupar variáveis de complicações perinatais
+da_proc <- da_proc |> 
+    dplyr::mutate(
+        complicacoes = as.factor(
+            dplyr::if_else(
+                prematuro == "Sim" | traumatismo == "Sim" |
+                disf_resp == "Sim" | malform == "Sim" |
+                sofrfetal == "Sim",
+                "Sim", "Não"
+            )
+        ),
+        .keep = "unused"
+    )
 
 # Criar base com variáveis imputadas pela moda e mediana
 da_imp <- da_proc |> 
