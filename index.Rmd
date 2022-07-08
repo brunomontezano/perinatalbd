@@ -26,7 +26,8 @@ Universidade Federal de Pelotas intitulada "Coorte de 1993".
 
 ```{r}
 # Carrega dados da Coorte de 1993
-dados_coorte <- haven::read_sav("data/banco_QI_15_07.sav")
+dados_coorte <- haven::read_sav("data/banco_QI_15_07.sav",
+                                user_na = FALSE)
 ```
 
 ## Transtorno bipolar
@@ -35,6 +36,29 @@ O diagnóstico de transtorno bipolar será calculado pela MINI (Mini
 International Neuropsychiatric Interview) por meio dos critérios
 diagnósticos do DSM-IV. Serão calculados diagnósticos de transtorno
 bipolar tipo I e transtorno bipolar tipo II.
+
+```{r}
+dados_com_na <- haven::read_sav("data/banco_QI_15_07.sav",
+                                user_na = TRUE)
+dados_novos <- dados_com_na |> 
+    dplyr::mutate(
+        outcome = dplyr::if_else(
+            MDD_BD1_2_notmood %in% 2:3 |
+            TB_final_original %in% c(1, 999) |
+            TB1_18anos == 1 | TBII.p1_18anos == 1,
+            "Sim",
+            "Não",
+            missing = "Não"
+        )
+    ) |> 
+    dplyr::filter(!is.na(MDD_BD1_2_notmood) |
+                  !is.na(TB_final_original) |
+                  !is.na(TB1_18anos) |
+                  !is.na(TBII.p1_18anos) |
+                  outcome == "Sim"
+                  )
+```
+
 
 ### Criação das variáveis de episódio de humor e filtragem para reter variáveis perinatais
 
@@ -57,10 +81,9 @@ vars_vanessa <- c("apartip", "ainduz", "aprobrn", "aerrado",
 # Filtrar base para manter subamostra da avaliação aos 22 anos
 # Transformar variáveis com rótulos em variáveis tipo fator
 # Criar subconjunto com variável diagnóstico e variáveis perinatais
-da <- dados_coorte |> 
-    dplyr::filter(!is.na(TB_final)) |> 
+da <- dados_novos |> 
     haven::as_factor() |> 
-    dplyr::select(TB_final, dplyr::any_of(vars_vanessa))
+    dplyr::select(outcome, dplyr::any_of(vars_vanessa))
 ```
 
 ### Criação do diagnóstico de TB
@@ -74,8 +97,8 @@ não-bipolares na amostra:
 
 ```{r}
 da |> 
-    dplyr::count(TB_final) |> 
-    ggplot2::ggplot(ggplot2::aes(x = TB_final, y = n)) +
+    dplyr::count(outcome) |> 
+    ggplot2::ggplot(ggplot2::aes(x = outcome, y = n)) +
     ggplot2::geom_col(fill = "royalblue") +
     ggplot2::geom_text(ggplot2::aes(label = n), vjust = -0.5, size = 5) +
     ggnuplot::theme_gnuplot(base_size = 20) +
@@ -127,7 +150,7 @@ maneira de considerar possível associação.
 da_proc <- da |>
     dplyr::transmute(
         # Desfecho: transtorno bipolar aos 22 anos
-        tb_dic = factor(dplyr::if_else(TB_final == 1,
+        tb_dic = factor(dplyr::if_else(outcome == "Sim",
                                          "Sim",
                                          "Não"
                                          ),
@@ -477,14 +500,18 @@ mod_filtrado_fit |>
         size = 0.8) +
     ggplot2::geom_vline(xintercept = 1) +
     ggplot2::scale_x_continuous(limits = c(0, 3)) +
-    ggplot2::scale_y_discrete(labels = c("Baixo comprimento",
-                                         "Escolaridade materna",
-                                         "Escolaridade paterna",
-                                         "Paridade (maior que 4)",
+    ggplot2::scale_y_discrete(labels = c("Anemia gestacional (sim)",
+                                         "Baixo peso ao nascer (sim)",
+                                         "Cesária (sim)",
+                                         "Escolaridade materna (em anos)",
+                                         "Escolaridade paterna (em anos)",
+                                         "Etilismo pesado na gestação (sim)",
+                                         "Idade da mãe",
+                                         "Paridade (maior ou igual a 4)",
                                          "Perímetro cefálico",
-                                         "Renda familiar",
-                                         "Ruptura familiar",
-                                         "Tabagismo na gravidez")) +
+                                         "Renda familiar (em SM)",
+                                         "Ruptura familiar (sim)",
+                                         "Tabagismo gestacional (ativo ou passivo)")) +
     ggplot2::labs(x = "Razão de chances", y = "Variável") +
     ggnuplot::theme_gnuplot(base_size = 16)
 ```
