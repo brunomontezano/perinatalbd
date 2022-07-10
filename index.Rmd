@@ -25,6 +25,8 @@ coorte de nascimento coordenada pelo Centro de Epidemiologia da
 Universidade Federal de Pelotas intitulada "Coorte de 1993".
 
 ```{r}
+# Seed para reprodutibilidade dos resultados
+set.seed(1)
 # Carrega dados da Coorte de 1993
 dados_coorte <- haven::read_sav("data/banco_QI_15_07.sav",
                                 user_na = FALSE)
@@ -125,10 +127,17 @@ da |>
     ggplot2::geom_col(fill = "royalblue") +
     ggplot2::geom_text(ggplot2::aes(label = n), vjust = -0.5, size = 7) +
     ggplot2::theme_minimal(base_size = 20) +
-    ggplot2::labs(x = "Diagnóstico", y = "Número de sujeitos")
+    ggplot2::labs(x = "\nDiagnóstico",
+                  y = "Número de sujeitos\n",
+                  title = "Distribuição de sujeitos com diagnóstico e sem diagnóstico de transtorno bipolar",
+                  subtitle = "Avaliações aos 18 e 22 anos") +
+    ggplot2::theme(
+        axis.text.x = ggplot2::element_text(size = 20),
+        axis.text.y = ggplot2::element_text(size = 20)
+        )
 ```
 
-E mais um gráfico para demonstrar, agora para demonstrar a distribuição dos
+E mais um gráfico, agora para demonstrar a distribuição dos
 subtipos de transtorno bipolar (tipo I e tipo II) e o momento em que o
 diagnóstico foi concretizado:
 
@@ -139,7 +148,14 @@ dados_com_desfecho |>
     ggplot2::geom_col(fill = "darkorange") +
     ggplot2::geom_text(ggplot2::aes(label = n), vjust = -0.5, size = 7) +
     ggplot2::theme_minimal(base_size = 20) +
-    ggplot2::labs(x = "Subtipo e idade de diagnóstico", y = "Número de sujeitos")
+    ggplot2::labs(x = "\nSubtipo e idade de diagnóstico",
+                  y = "Número de sujeitos\n",
+                  title = "Distribuição dos subtipos de transtorno bipolar (TB) e idade de diagnóstico",
+                  subtitle = "Avaliação do desfecho aos 18 e 22 anos") +
+    ggplot2::theme(
+        axis.text.x = ggplot2::element_text(size = 20),
+        axis.text.y = ggplot2::element_text(size = 20)
+        )
 ```
 
 ## Fatores perinatais e transtorno bipolar
@@ -525,9 +541,7 @@ mod_filtrado_fit |>
         upper_int = x97_5_percent,
         lower_int = x2_5_percent
         ) |> 
-    dplyr::filter(
-        variavel != "(Intercept)" & or < 9 & or > 0.5
-        ) |> 
+    dplyr::filter(variavel != "(Intercept)") |> 
     ggplot2::ggplot() +
     ggplot2::aes(x = or, y = variavel) +
     ggplot2::geom_point(size = 5, color = "royalblue") +
@@ -537,19 +551,24 @@ mod_filtrado_fit |>
         size = 0.8) +
     ggplot2::geom_vline(xintercept = 1) +
     ggplot2::scale_x_continuous(limits = c(0, 3)) +
-    ggplot2::scale_y_discrete(labels = c("Anemia gestacional (sim)",
+    ggplot2::scale_y_discrete(labels = c("Baixo comprimento (sim)",
                                          "Baixo peso ao nascer (sim)",
                                          "Cesária (sim)",
                                          "Escolaridade materna (em anos)",
                                          "Escolaridade paterna (em anos)",
-                                         "Etilismo pesado na gestação (sim)",
+                                         "Idade da mãe (menor que 20 anos)",
                                          "Idade da mãe",
                                          "Paridade (maior ou igual a 4)",
                                          "Perímetro cefálico",
                                          "Renda familiar (em SM)",
                                          "Ruptura familiar (sim)",
                                          "Tabagismo gestacional (ativo ou passivo)")) +
-    ggplot2::labs(x = "Razão de chances", y = "Variável") +
-    ggnuplot::theme_gnuplot(base_size = 16)
+    ggplot2::labs(x = expression(paste("Razão de chances (", italic("odds ratio"), ")")),
+                  y = "Variável") +
+    ggplot2::theme_minimal(base_size = 20) +
+    ggplot2::theme(
+        axis.text.x = ggplot2::element_text(size = 20),
+        axis.text.y = ggplot2::element_text(size = 20)
+        )
 ```
 
