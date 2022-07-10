@@ -40,6 +40,7 @@ diagnósticos do DSM-IV. Serão calculados diagnósticos de transtorno
 bipolar tipo I e transtorno bipolar tipo II.
 
 ```{r}
+# Criar variável de desfecho, além de uma variável com os subtipos de TB
 dados_com_desfecho <- dados_coorte |> 
     haven::as_factor() |> 
     dplyr::mutate(
@@ -408,6 +409,9 @@ da_proc |>
     purrr::map_if(is.factor, \(x) table(x, useNA = "always"), .else = summary)
 
 # Agrupar variáveis de complicações perinatais
+# O argumento .keep da função dplyr::mutate permite
+# que somente as variáveis não utilizadas nas operações
+# sejam mantidas na base de dados resultante
 da_proc <- da_proc |> 
     dplyr::mutate(
         complicacoes = as.factor(
@@ -437,7 +441,8 @@ da_imp |>
 ```
 
 ```{r}
-# Checar frequência agrupada pelo desfecho
+# A função abaixo foi criada para verificar a frequência absoluta de
+# uma variável independente qualquer estratificada pelo desfecho
 ver_freq <- function(var) {
     
     da_imp |> 
@@ -446,6 +451,7 @@ ver_freq <- function(var) {
     
 }
 
+# Checar frequência agrupada pelo desfecho
 da_imp |> 
     purrr::map_if(is.factor, ver_freq, .else = summary)
 ```
@@ -453,6 +459,8 @@ da_imp |>
 ### Análise bivariada com variáveis categóricas
 
 ```{r}
+# Carregar o pacote magrittr para utilizar o placeholder "." na função
+# do teste qui-quadrado abaixo
 library(magrittr, include.only = "%>%")
 
 cat_biv <- da_imp |>
@@ -470,6 +478,7 @@ knitr::kable(cat_biv)
 ### Análise bivariada com variáveis numéricas
 
 ```{r}
+# Realiza análise bivariada com as variáveis numéricas através de teste t
 num_biv <- da_imp |>
     dplyr::select(tb_dic, where(is.numeric)) |>
     tidyr::pivot_longer(names_to = "variable", values_to = "value", -tb_dic) |>
@@ -498,31 +507,47 @@ Neste modelo, foram incluídas somente as variáveis independentes que
 apresentaram um valor de p menor que 0,2 na análise bivariada (bruta).
 
 ```{r}
+# Pegar nomes das variáveis que apresentaram p-value menor que 0,2 na análise
+# bruta
 vars_multivar <- cat_biv |> 
     dplyr::bind_rows(num_biv |> dplyr::select(variable, statistic, p.value)) |> 
     dplyr::ungroup() |> 
     dplyr::filter(p.value < 0.2) |> 
     dplyr::pull(variable)
 
+# Adicionar desfecho na fórmula juntamente aos preditores que forem incluídos
+# como argumento da função
 add_outcome <- function(predictors) {
     reg_mod <- paste0("tb_dic", " ~ ", predictors)
     return(reg_mod)
 }
 
+# Juntar os preditores separados por + (para sintaxe de fórmula) e ao final,
+# adicionar o desfecho
 mod_filtrado <- vars_multivar |> 
     paste(collapse = " + ") |> 
     add_outcome()
 
+# Especificar modelo a ser ajustado
 mod <- parsnip::logistic_reg() |> 
     parsnip::set_mode("classification") |> 
     parsnip::set_engine("glm")
 
+# Ajustar a partir da fórmula construída previamente
 mod_filtrado_fit <- mod |> 
     parsnip::fit(as.formula(mod_filtrado), data = da_imp)
 
+# Mostrar resultados tidy
 mod_filtrado_fit |> 
     broom::tidy() |> 
-    knitr::kable()
+    knitr::kable(
+        col.names = c("Variável",
+                      "Beta",
+                      "Erro Padrão",
+                      "Estatística",
+                      "p-valor"),
+        caption = "Resumo do modelo final com variáveis que apresentaram p-valor menor que 0,2 na análise bruta."
+    )
 ```
 
 #### Plot com OR do modelo com p \< 0,2 na análise bivariada
@@ -536,11 +561,15 @@ Além disso, a variável de traumatismo no parto, como pode ser observado na tab
 abaixo, apresentou um intervalo de confiança superior na razão de chances de 74,8.
 
 ```{r, warning = FALSE}
+# Seed para reprodutibilidade
 set.seed(1)
+
+# Criação dos intervalos de confiança para os parâmetros do modelo ajustado
 intervalos <- exp(confint(mod_filtrado_fit$fit)) |>
     tibble::as_tibble(rownames = "term") |> 
     janitor::clean_names()
 
+# Mostrar odds ratio com os respectivos intervalos de confiança
 mod_filtrado_fit |> 
     broom::tidy() |> 
     dplyr::left_join(intervalos, by = "term") |> 
@@ -549,7 +578,14 @@ mod_filtrado_fit |>
         or = exp(estimate),
         lower_int = x2_5_percent,
         upper_int = x97_5_percent
-        )
+        ) |> 
+    knitr::kable(
+        col.names = c("Variável",
+                      "Odds Ratio",
+                      "Intervalo Inferior",
+                      "Intervalo Superior"),
+        caption = "Razão de chances para cada variável incluída no modelo final."
+    )
 
 mod_filtrado_fit |> 
     broom::tidy() |> 
