@@ -5,8 +5,8 @@ date: "`r Sys.Date()`"
 lang: "pt-br"
 output:
     html_document:
-        theme: "united"
-        highlight: "zenburn"
+        theme: "paper"
+        highlight: "kate"
 editor_options: 
   markdown: 
     wrap: 72
@@ -38,25 +38,49 @@ diagnósticos do DSM-IV. Serão calculados diagnósticos de transtorno
 bipolar tipo I e transtorno bipolar tipo II.
 
 ```{r}
-dados_com_na <- haven::read_sav("data/banco_QI_15_07.sav",
-                                user_na = TRUE)
-dados_novos <- dados_com_na |> 
+dados_com_desfecho <- dados_coorte |> 
+    haven::as_factor() |> 
     dplyr::mutate(
-        outcome = dplyr::if_else(
-            MDD_BD1_2_notmood %in% 2:3 |
-            TB_final_original %in% c(1, 999) |
-            TB1_18anos == 1 | TBII.p1_18anos == 1,
-            "Sim",
-            "Não",
-            missing = "Não"
+        tb1_22 = dplyr::if_else(
+            MDD_BD1_2_notmood == "Bipolar Disorder 1",
+            "Sim", "Não"
+        ),
+        tb2_22 = dplyr::if_else(
+            MDD_BD1_2_notmood == "Bipolar Disorder 2",
+            "Sim", "Não"
+        ),
+        tb1_18 = dplyr::if_else(
+            TB1_18anos == 1,
+            "Sim", "Não"
+        ),
+        tb2_18 = dplyr::if_else(
+            TBII.p1_18anos == 1,
+            "Sim", "Não"
+        ),
+        outcome_subtypes = dplyr::case_when(
+            tb1_22 == "Sim" ~ "TB I aos 22 anos",
+            tb1_18 == "Sim" ~ "TB I aos 18 anos",
+            tb2_22 == "Sim" ~ "TB II aos 22 anos",
+            tb2_18 == "Sim" ~ "TB II aos 18 anos",
+            tb1_22 == "Não" |
+            tb2_22 == "Não" |
+            tb1_18 == "Não" |
+            tb2_18 == "Não" ~ "Sem TB",
+            TRUE ~ NA_character_
+        ),
+        outcome = dplyr::case_when(
+            tb1_22 == "Sim" |
+            tb2_22 == "Sim" |
+            tb1_18 == "Sim" |
+            tb2_18 == "Sim" ~ "Sim",
+            tb1_22 == "Não" |
+            tb2_22 == "Não" |
+            tb1_18 == "Não" |
+            tb2_18 == "Não" ~ "Não",
+            TRUE ~ NA_character_
         )
     ) |> 
-    dplyr::filter(!is.na(MDD_BD1_2_notmood) |
-                  !is.na(TB_final_original) |
-                  !is.na(TB1_18anos) |
-                  !is.na(TBII.p1_18anos) |
-                  outcome == "Sim"
-                  )
+    dplyr::filter(!is.na(outcome))
 ```
 
 
@@ -81,8 +105,7 @@ vars_vanessa <- c("apartip", "ainduz", "aprobrn", "aerrado",
 # Filtrar base para manter subamostra da avaliação aos 22 anos
 # Transformar variáveis com rótulos em variáveis tipo fator
 # Criar subconjunto com variável diagnóstico e variáveis perinatais
-da <- dados_novos |> 
-    haven::as_factor() |> 
+da <- dados_com_desfecho |> 
     dplyr::select(outcome, dplyr::any_of(vars_vanessa))
 ```
 
@@ -100,9 +123,23 @@ da |>
     dplyr::count(outcome) |> 
     ggplot2::ggplot(ggplot2::aes(x = outcome, y = n)) +
     ggplot2::geom_col(fill = "royalblue") +
-    ggplot2::geom_text(ggplot2::aes(label = n), vjust = -0.5, size = 5) +
-    ggnuplot::theme_gnuplot(base_size = 20) +
+    ggplot2::geom_text(ggplot2::aes(label = n), vjust = -0.5, size = 7) +
+    ggplot2::theme_minimal(base_size = 20) +
     ggplot2::labs(x = "Diagnóstico", y = "Número de sujeitos")
+```
+
+E mais um gráfico para demonstrar, agora para demonstrar a distribuição dos
+subtipos de transtorno bipolar (tipo I e tipo II) e o momento em que o
+diagnóstico foi concretizado:
+
+```{r}
+dados_com_desfecho |> 
+    dplyr::count(outcome_subtypes) |> 
+    ggplot2::ggplot(ggplot2::aes(x = outcome_subtypes, y = n)) +
+    ggplot2::geom_col(fill = "darkorange") +
+    ggplot2::geom_text(ggplot2::aes(label = n), vjust = -0.5, size = 7) +
+    ggplot2::theme_minimal(base_size = 20) +
+    ggplot2::labs(x = "Subtipo e idade de diagnóstico", y = "Número de sujeitos")
 ```
 
 ## Fatores perinatais e transtorno bipolar
