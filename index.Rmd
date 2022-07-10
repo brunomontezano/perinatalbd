@@ -165,12 +165,13 @@ dados_com_desfecho |>
 As seguintes variáveis foram construídas:
 
 -   `tb_dic`: Diagnóstico de TB tipo I ou TB tipo II (dicotômica)
+- `complicacoes`: Variáveis de prematuridade, traumatismo no parto, disfunção
+respiratória no parto, malformação no parto e sofrimento fetal agrupadas
+(através do operador OU)
 -   `cesarea`: O parto foi cesária?
 -   `parto_induzido`: A bolsa rompeu, foi utilizado soro ou ambas as
     coisas?
 -   `uti_neo`: O recém-nascido foi para UTI?
-- `complicacoes`: Variáveis de prematuridade, traumatismo no parto,
-disfunção respiratória no parto, malformação no parto e sofrimento fetal agrupadas (através do operador OU)
 -   `hipert_materna`: Hipertensão arterial materna
 -   `dm_materna`: Diabetes materna
 -   `infec_gest`: Infecção gestacional
@@ -202,7 +203,7 @@ maneira de considerar possível associação.
 ```{r}
 da_proc <- da |>
     dplyr::transmute(
-        # Desfecho: transtorno bipolar aos 22 anos
+        # Desfecho: transtorno bipolar aos 18 ou 22 anos de idade
         tb_dic = factor(dplyr::if_else(outcome == "Sim",
                                          "Sim",
                                          "Não"
@@ -246,6 +247,7 @@ da_proc <- da |>
                 missing = "Não"
             )
         ),
+        # Estresse respiratório no parto
         disf_resp = as.factor(
             dplyr::if_else(
                 aprobrn1 == "stress resp" | aprobrn2 == "stress resp" |
@@ -255,6 +257,7 @@ da_proc <- da |>
                 missing = "Não"
             )
         ),
+        # Malformação
         malform = as.factor(
             dplyr::if_else(
                 aprobrn1 == "malformacao" | aprobrn2 == "malformacao" |
@@ -264,6 +267,7 @@ da_proc <- da |>
                 missing = "Não"
             )
         ),
+        # Sofrimento fetal
         sofrfetal = as.factor(
             dplyr::if_else(
                 aprobrn1 == "sofrim fetal" | aprobrn2 == "sofrim fetal" |
@@ -273,12 +277,14 @@ da_proc <- da |>
                 missing = "Não"
             )
         ),
+        # Hipertensão materna
         hipert_materna = relevel(ahipert, ref = "nao"),
         dm_materna = as.factor(dplyr::if_else(
             adiabet %in% c("tratado", "nao tratado"),
             "Sim",
             "Não"
         )),
+        # Infecção gestacional
         infec_gest = as.factor(
             dplyr::if_else(
                 ainfecur %in% c("tratado", "nao tratado") |
@@ -287,11 +293,13 @@ da_proc <- da |>
                 "Não"
             )
         ),
+        # Anemia gestacional
         anemia_gest = as.factor(dplyr::if_else(
             aanemia %in% c("tratado", "nao tratado"),
             "Sim",
             "Não"
         )),
+        # Hemorragia no parto
         hemorr_parto = as.factor(
             dplyr::if_else(
                 amotcesa == "hemorragia materna" | apartind == "sangramento",
@@ -299,50 +307,54 @@ da_proc <- da |>
                 "Não"
             )
         ),
+        # Tabagismo gestacional
         tab_gest = as.factor(
             dplyr::if_else(afumou == "sim" | acompfum == "sim",
                            "Sim",
                            "Não"
                            )
         ),
+        # Etilismo pesado na gestação
         etil_pesado_gest = as.factor(
             dplyr::if_else(abebalc == "sim",
                            "Sim",
                            "Não"
                            )
         ),
+        # Ruptura familiar
         rup_famil = as.factor(
             dplyr::if_else(avivmar == "sim",
                            "Não",
                            "Sim"
                            )
         ),
+       # Baixo peso ao nascer
        baixo_peso = as.factor(
            dplyr::if_else(apesorn < 2500,
                           "Sim",
                           "Não"
                           )
        ),
+       # Baixo comprimento ao nascer
        baixo_comp = as.factor(
            dplyr::if_else(acompr < 47,
                           "Sim",
                           "Não"
                           )
        ),
+       # Perímetro cefálico
        per_cef = apcrn,
-       per_cef_curto = as.factor(
-           dplyr::if_else(apcrn < 33,
-                          "Sim",
-                          "Não"
-                          )
-       ),
+       # Escolaridade paterna (em anos)
        escol_paterna = aescpai,
+       # Escolaridade materna (em anos)
        escol_materna = aescmae,
+       # Paridade (número de filhos)
        paridade = relevel(as.factor(dplyr::if_else(
            aparidad %in% c("0", "1", "2", "3"),
             "Menor que 4",
             "Maior ou igual a 4")
            ), ref = "Menor que 4"), 
+       # Apoio familiar
        apoio_familiar = as.factor(
            dplyr::if_else(
                aapoio == "sim",
@@ -350,7 +362,9 @@ da_proc <- da |>
                "Não"
            )
        ),
+       # Idade da mãe
        idade_mae_num = aidadmae,
+       # Idade da mãe (menor que 20)
        idade_mae_20 = as.factor(
            dplyr::if_else(
                aidadmae < 20,
@@ -358,6 +372,7 @@ da_proc <- da |>
                "Maior ou igual a 20"
            )
        ),
+       # Idade da mãe (maior ou igual que 34)
        idade_mae_34 = as.factor(
            dplyr::if_else(
                aidadmae < 34,
@@ -365,6 +380,7 @@ da_proc <- da |>
                "Maior ou igual que 34"
            )
        ),
+       # Pretende amamentar
        pretende_amamentar = as.factor(
            dplyr::if_else(
                apretama == "sim",
@@ -372,8 +388,11 @@ da_proc <- da |>
                "Não"
            )
        ),
+       # Apgar no primeiro minuto
        apgar_1 = aapgar1,
+       # Apgar no minuto 5
        apgar_5 = aapgar5,
+       # Renda familiar em salários mínimos (SM)
        renda_familiar = arenfam
     )
 ```
@@ -561,7 +580,6 @@ mod_filtrado_fit |>
                                          "Paridade (maior ou igual a 4)",
                                          "Perímetro cefálico",
                                          "Renda familiar (em SM)",
-                                         "Ruptura familiar (sim)",
                                          "Tabagismo gestacional (ativo ou passivo)")) +
     ggplot2::labs(x = expression(paste("Razão de chances (", italic("odds ratio"), ")")),
                   y = "Variável") +
