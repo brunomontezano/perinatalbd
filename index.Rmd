@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.width=16, fig.height=9)
 
 O presente trabalho almeja observar os efeitos de fatores perinatais e
 do aleitamento materno no desenvolvimento de transtorno bipolar (TB) aos
-22 anos de idade. Os dados utilizados para tal foram coletados em uma
+18 e 22 anos de idade. Os dados utilizados para tal foram coletados em uma
 coorte de nascimento coordenada pelo Centro de Epidemiologia da
 Universidade Federal de Pelotas intitulada "Coorte de 1993".
 
@@ -115,7 +115,7 @@ da <- dados_com_desfecho |>
 ### Criação do diagnóstico de TB
 
 Além da manutenção de variável de TB, a base de dados foi filtrada para
-manter somente os sujeitos avaliados aos 22 anos (através da filtragem
+manter somente os sujeitos avaliados aos 18 ou 22 anos (através da filtragem
 por meio de uma variável de diagnóstico da doença da avaliação em 2015).
 
 Abaixo, segue um gráfico de barras com a proporção de bipolares e
@@ -553,9 +553,9 @@ mod_filtrado_fit |>
 #### Plot com OR do modelo com p \< 0,2 na análise bivariada
 
 Como pode ser observado na tabela acima, traumatismo no parto se mostrou como
-um fator de risco para o desenvolvimento de TB aos 22 anos, porém não está
-presente na figura abaixo por ter apresentado um odds ratio que ficaria muito
-fora dos limites do gráfico.
+um fator de risco para o desenvolvimento de TB aos 18 ou aos 22 anos, porém não
+está presente na figura abaixo por ter apresentado um odds ratio que ficaria
+muito fora dos limites do gráfico.
 
 Além disso, a variável de traumatismo no parto, como pode ser observado na tabela
 abaixo, apresentou um intervalo de confiança superior na razão de chances de 74,8.
