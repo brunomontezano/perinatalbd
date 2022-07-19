@@ -11,7 +11,7 @@
 
 <meta name="author" content="Bruno Montezano" />
 
-<meta name="date" content="2022-07-17" />
+<meta name="date" content="2022-07-19" />
 
 <title>Fatores perinatais e desenvolvimento de transtorno bipolar</title>
 
@@ -459,7 +459,7 @@ pre code {
 <h1 class="title toc-ignore">Fatores perinatais e desenvolvimento de
 transtorno bipolar</h1>
 <h4 class="author">Bruno Montezano</h4>
-<h4 class="date">2022-07-17</h4>
+<h4 class="date">2022-07-19</h4>
 
 </div>
 
@@ -755,7 +755,7 @@ na qual se pensou uma maneira de considerar possível associação.</p>
 <span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>        ),</span>
 <span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Etilismo pesado na gestação</span></span>
 <span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>        <span class="at">etil_pesado_gest =</span> <span class="fu">as.factor</span>(</span>
-<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">if_else</span>(abebalc <span class="sc">==</span> <span class="st">&quot;sim&quot;</span>,</span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>            dplyr<span class="sc">::</span><span class="fu">if_else</span>(aalcool <span class="sc">==</span> <span class="st">&quot;sim&quot;</span>,</span>
 <span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>                           <span class="st">&quot;Sim&quot;</span>,</span>
 <span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>                           <span class="st">&quot;Não&quot;</span></span>
 <span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>                           )</span>
@@ -919,7 +919,7 @@ mediana (variáveis numéricas) e moda (variáveis categóricas).</p>
 ## $etil_pesado_gest
 ## x
 ##  Não  Sim &lt;NA&gt; 
-## 3594  200    0 
+## 3756   38    0 
 ## 
 ## $rup_famil
 ## x
@@ -1047,11 +1047,6 @@ mediana (variáveis numéricas) e moda (variáveis categóricas).</p>
 ## x
 ##  Não  Sim &lt;NA&gt; 
 ## 1613 2181    0 
-## 
-## $etil_pesado_gest
-## x
-##  Não  Sim &lt;NA&gt; 
-## 3594  200    0 
 ## 
 ## $rup_famil
 ## x
@@ -1186,16 +1181,6 @@ mediana (variáveis numéricas) e moda (variáveis categóricas).</p>
 ## 2 Não    Sim      1995
 ## 3 Sim    Não        82
 ## 4 Sim    Sim       186
-## 
-## $etil_pesado_gest
-## # A tibble: 4 × 3
-## # Groups:   tb_dic [2]
-##   tb_dic `&lt;fct&gt;`     n
-##   &lt;fct&gt;  &lt;fct&gt;   &lt;int&gt;
-## 1 Não    Não      3344
-## 2 Não    Sim       182
-## 3 Sim    Não       250
-## 4 Sim    Sim        18
 ## 
 ## $rup_famil
 ## # A tibble: 4 × 3
@@ -1346,46 +1331,41 @@ mediana (variáveis numéricas) e moda (variáveis categóricas).</p>
 <td align="right">0.0734633</td>
 </tr>
 <tr class="even">
-<td align="left">etil_pesado_gest</td>
-<td align="right">1.2056854</td>
-<td align="right">0.3233383</td>
-</tr>
-<tr class="odd">
 <td align="left">hipert_materna</td>
 <td align="right">2.3535684</td>
-<td align="right">0.3153423</td>
+<td align="right">0.3073463</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">idade_mae_20</td>
 <td align="right">2.1433371</td>
-<td align="right">0.1424288</td>
+<td align="right">0.1549225</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">idade_mae_34</td>
 <td align="right">1.1410231</td>
-<td align="right">0.3193403</td>
+<td align="right">0.2968516</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">infec_gest</td>
 <td align="right">0.0250683</td>
-<td align="right">0.8935532</td>
-</tr>
-<tr class="odd">
-<td align="left">paridade</td>
-<td align="right">11.3528407</td>
-<td align="right">0.0024988</td>
+<td align="right">0.9005497</td>
 </tr>
 <tr class="even">
-<td align="left">parto_induzido</td>
-<td align="right">0.3622571</td>
-<td align="right">0.5667166</td>
+<td align="left">paridade</td>
+<td align="right">11.3528407</td>
+<td align="right">0.0004998</td>
 </tr>
 <tr class="odd">
+<td align="left">parto_induzido</td>
+<td align="right">0.3622571</td>
+<td align="right">0.5702149</td>
+</tr>
+<tr class="even">
 <td align="left">rup_famil</td>
 <td align="right">1.7500616</td>
 <td align="right">0.2008996</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">tab_gest</td>
 <td align="right">16.7580475</td>
 <td align="right">0.0004998</td>

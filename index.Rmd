@@ -317,7 +317,7 @@ da_proc <- da |>
         ),
         # Etilismo pesado na gestação
         etil_pesado_gest = as.factor(
-            dplyr::if_else(abebalc == "sim",
+            dplyr::if_else(aalcool == "sim",
                            "Sim",
                            "Não"
                            )
