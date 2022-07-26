@@ -40,6 +40,29 @@ diagnósticos do DSM-IV. Serão calculados diagnósticos de transtorno
 bipolar tipo I e transtorno bipolar tipo II.
 
 ```{r}
+# Número de sujeitos incluídos
+dados_coorte |> 
+    dplyr::filter((!is.na(MDD_BD1_2_notmood)) |
+                  (!is.na(TB1_18anos)) |
+                  (!is.na(TBII.p1_18anos))) |> 
+    nrow()
+
+# Quem foi avaliado em cada tempo?
+#dados_coorte |> 
+#    dplyr::filter((!is.na(MDD_BD1_2_notmood)) |
+#                  (!is.na(TB1_18anos)) |
+#                  (!is.na(TBII.p1_18anos))) |> 
+#    dplyr::mutate(
+#        av18 = dplyr::if_else(!is.na(MDD_BD1_2_notmood), "Sim", "Não"),
+#        av22 = dplyr::if_else(!is.na(kmini1), "Sim", "Não"),
+#        av_quais = dplyr::case_when(
+#            av18 == "Sim" & av22 == "Sim" ~ "Avaliado em ambos os tempos",
+#            av18 == "Sim" & av22 == "Não" ~ "Avaliado aos 18 anos apenas",
+#            av18 == "Não" & av22 == "Sim" ~ "Avaliado aos 22 anos apenas"
+#        )
+#    ) |> 
+#    dplyr::count(av_quais)
+
 # Criar variável de desfecho, além de uma variável com os subtipos de TB
 dados_com_desfecho <- dados_coorte |> 
     haven::as_factor() |> 
@@ -279,7 +302,14 @@ da_proc <- da |>
             )
         ),
         # Hipertensão materna
-        hipert_materna = relevel(ahipert, ref = "nao"),
+        hipert_materna = relevel(
+            as.factor(
+                dplyr::case_when(
+                    as.character(ahipert) == "nao sabe" ~ NA_character_,
+                    TRUE ~ as.character(ahipert)
+                )
+            ), ref = "nao"),
+        # Diabetes materna
         dm_materna = as.factor(dplyr::if_else(
             adiabet %in% c("tratado", "nao tratado"),
             "Sim",
@@ -365,22 +395,6 @@ da_proc <- da |>
        ),
        # Idade da mãe
        idade_mae_num = aidadmae,
-       # Idade da mãe (menor que 20)
-       idade_mae_20 = as.factor(
-           dplyr::if_else(
-               aidadmae < 20,
-               "Menor que 20",
-               "Maior ou igual a 20"
-           )
-       ),
-       # Idade da mãe (maior ou igual que 34)
-       idade_mae_34 = as.factor(
-           dplyr::if_else(
-               aidadmae < 34,
-               "Menor que 34",
-               "Maior ou igual que 34"
-           )
-       ),
        # Pretende amamentar
        pretende_amamentar = as.factor(
            dplyr::if_else(
@@ -587,6 +601,7 @@ mod_filtrado_fit |>
         caption = "Razão de chances para cada variável incluída no modelo final."
     )
 
+# Criar plot com odds ratio listados acima
 mod_filtrado_fit |> 
     broom::tidy() |> 
     dplyr::left_join(intervalos, by = "term") |> 
@@ -611,7 +626,6 @@ mod_filtrado_fit |>
                                          "Cesária (sim)",
                                          "Escolaridade materna (em anos)",
                                          "Escolaridade paterna (em anos)",
-                                         "Idade da mãe (menor que 20 anos)",
                                          "Idade da mãe",
                                          "Paridade (maior ou igual a 4)",
                                          "Perímetro cefálico",
@@ -624,5 +638,76 @@ mod_filtrado_fit |>
         axis.text.x = ggplot2::element_text(size = 20),
         axis.text.y = ggplot2::element_text(size = 20)
         )
+```
+
+## Tabela descritiva com dados perinatais
+
+```{r, warning = FALSE}
+pvalue <- function(x, ...) {
+    # Construir vetores com y (desfecho), e grupos (estratificação) chamado g
+    y <- unlist(x)
+    g <- factor(rep(1:length(x), times=sapply(x, length)))
+    if (is.numeric(y)) {
+        # Para variáveis numéricas, performar um teste t de duas amostras
+        p <- t.test(y ~ g)$p.value
+    } else {
+        # For categorical variables, perform a chi-squared test of independence
+        # Para variáveis categóricas, performar um teste qui-quadrado de independência
+        p <- chisq.test(table(y, g))$p.value
+    }
+    # Formatar o p-valor usando sintaxe em HTML para o símbolo de "menor que"
+    # A string vazia coloca o output do p-valor na linha abaixo do rótulo da variável
+    c("", sub("<", "&lt;", format.pval(p, digits=3, eps=0.001)))
+}
+
+# Gerar objeto da tabela com dados perinatais
+# O underscore (_) indica o placeholder do pipe nativo do R
+tabela_peri <- da_proc |> 
+    table1::table1(~ cesarea + parto_induzido + uti_neo + hipert_materna +
+                       dm_materna + infec_gest + anemia_gest + hemorr_parto +
+                       tab_gest + etil_pesado_gest + rup_famil + baixo_peso +
+                       baixo_comp + per_cef + escol_paterna + escol_materna +
+                       paridade + apoio_familiar + idade_mae_num +
+                       pretende_amamentar + apgar_1 + apgar_5 + renda_familiar +
+                       complicacoes | tb_dic, data = _,
+                   extra.col = list("p-value" = pvalue),
+                   overall = FALSE)
+
+# Transformar para formato kable para melhor visualização
+tabela_peri |> 
+    table1::t1kable()
+```
+
+```{r, eval = FALSE}
+# Exportar tabela para Word
+tabela_peri |> 
+    table1::t1flex() |> 
+    flextable::save_as_docx(path = "output/tabela_peri.docx")
+```
+
+## Tabela descritiva com dados do follow-up
+
+```{r, warning = FALSE}
+# ld023a = estado civil
+#lescoljovemano = anos de estudo
+
+# Gerar tabela descritiva com dados do follow-up
+tabela_follow <- dados_com_desfecho |> 
+    dplyr::rename(estado_civil = ld023a,
+                  anos_de_estudo = lescoljovemano) |> 
+    table1::table1(~ estado_civil + anos_de_estudo | outcome, data = _,
+                   extra.col = list("p-value" = pvalue),
+                   overall = FALSE)
+
+# Transformar tabela em formato kable para melhor visualização no Rmd compilado
+tabela_follow |> 
+    table1::t1kable()
+```
+
+```{r, eval = FALSE}
+# Exportar tabela para Word
+tabela_follow |> 
+    table1::t1flex() |> 
+    flextable::save_as_docx(path = "output/tabela_follow.docx")
 ```
 
