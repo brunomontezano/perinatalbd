@@ -449,6 +449,7 @@ da_imp <- da_proc |>
     recipes::prep() |> 
     recipes::bake(new_data = NULL)
 
+
 # Checar que a imputação funcionou
 da_imp |> 
     purrr::map_if(is.factor, \(x) table(x, useNA = "always"), .else = summary)
@@ -468,6 +469,29 @@ ver_freq <- function(var) {
 # Checar frequência agrupada pelo desfecho
 da_imp |> 
     purrr::map_if(is.factor, ver_freq, .else = summary)
+```
+
+### Quais variáveis foram excluídas e quando?
+
+Na etapa de remoçao de variáveis com mais de 10% de missing,
+exclui-se a variável de hemorragia no parto, apgar no primeiro minuto e
+apgar no quinto minuto.
+
+Na etapa de retirada de variáveis com pouca ou nenhuma variabilidade,
+foram excluídas as seguintes variáveis: UTI neonatal, diabetes materna,
+etilismo pesado na gestação, se a mãe pretende amamentar e complicações
+no parto.
+
+```{r, eval = FALSE}
+da_prep <- da_proc |> 
+    recipes::recipe(tb_dic ~ .) |> 
+    recipes::step_filter_missing(recipes::all_predictors(), threshold = 0.1) |> 
+    recipes::step_impute_mode(recipes::all_nominal_predictors()) |> 
+    recipes::step_impute_median(recipes::all_numeric_predictors()) |> 
+    recipes::step_nzv(recipes::all_predictors()) |> 
+    recipes::prep()
+
+da_prep$steps |> View()
 ```
 
 ### Análise bivariada com variáveis categóricas
