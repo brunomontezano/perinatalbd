@@ -719,7 +719,8 @@ tabela_peri |>
 tabela_follow <- dados_com_desfecho |> 
     dplyr::rename(estado_civil = ld023a,
                   anos_de_estudo = lescoljovemano) |> 
-    table1::table1(~ estado_civil + anos_de_estudo | outcome, data = _,
+    table1::table1(~ estado_civil + anos_de_estudo | outcome,
+                   data = _, # Placeholder do pipe nativo
                    extra.col = list("p-value" = pvalue),
                    overall = FALSE)
 
@@ -734,4 +735,86 @@ tabela_follow |>
     table1::t1flex() |> 
     flextable::save_as_docx(path = "output/tabela_follow.docx")
 ```
+
+## Ocitocina e TB
+
+```{r}
+# ainduz = parto foi induzido (rompeu bolsa, soro, ambos, nao)
+
+dados_oci <- dados_com_desfecho |> 
+    dplyr::mutate(ocitocina = dplyr::if_else(
+        ainduz == "soro", "Sim", "Não"
+    ))
+
+janitor::tabyl(
+    dat = dados_oci,
+    var1 = ocitocina,
+    var2 = outcome,
+    show_na = TRUE
+)
+
+chi_oci <- chisq.test(x = dados_oci$ocitocina,
+           y = dados_oci$outcome,
+           correct = TRUE)
+```
+
+O p-valor do teste qui-quadrado entre ocitocina e o desfecho de TB no início da
+vida adulta foi de `r chi_oci$p.value`
+
+# Possível mediação da renda familiar no efeito da paridade
+
+Abaixo, cria-se um modelo de modelagem de equações estruturais para verificar
+a possível mediação da renda familiar no efeito da paridade (número de filhos)
+no desfecho de desenvolvimento de transtorno bipolar na idade adulta.
+
+```{r}
+set.seed(1)
+
+da_med <- da_imp |> 
+    dplyr::select(tb_dic, paridade, renda_familiar) |> 
+    dplyr::mutate(
+        paridade = dplyr::if_else(
+            paridade == "Menor que 4", 0, 1
+        )
+    )
+
+med_mod <- "# Mediação da renda para paridade como preditor de TB
+renda_familiar ~ a*paridade
+tb_dic ~ b*renda_familiar + c*paridade
+# Efeito indireto
+indireto := a * b
+# Efeito direto
+direto := c
+# Efeito total
+total := c + (a * b)"
+
+med_fit <- lavaan::sem(
+    med_mod,
+    data = da_med,
+    ordered = "tb_dic"
+)
+
+semTools::monteCarloCI(med_fit, nRep = 20000) |>
+    tibble::rownames_to_column("Efeito") |>
+    dplyr::rename("Beta" = est,
+                  "IC 2.5%" = ci.lower,
+                  "IC 97.5%" = ci.upper) |>
+    knitr::kable(caption = "Beta e intervalos de confiança de cada efeito do modelo de mediação baseado no método Monte Carlo com 20.000 amostras.",
+                 digits = 3)
+
+broom::tidy(med_fit, conf.int = TRUE) |> 
+    dplyr::select("Termo" = term,
+                  "Rótulo" = label,
+                  "Beta" = estimate,
+                  "Erro" = std.error,
+                  "p-valor" = p.value,
+                  "IC 2.5%" = conf.low,
+                  "IC 97.5%" = conf.high,
+                  "Beta_std" = std.all) |> 
+    knitr::kable(caption = "Tabela com parâmetros do modelo de modelagem de equações estruturais e respectivos rótulos.", digits = 3, format = "html")
+```
+
+
+
+
 
