@@ -11,7 +11,7 @@
 
 <meta name="author" content="Bruno Montezano" />
 
-<meta name="date" content="2022-07-28" />
+<meta name="date" content="2022-08-02" />
 
 <title>Fatores perinatais e desenvolvimento de transtorno bipolar</title>
 
@@ -683,7 +683,7 @@ pre code {
 <h1 class="title toc-ignore">Fatores perinatais e desenvolvimento de
 transtorno bipolar</h1>
 <h4 class="author">Bruno Montezano</h4>
-<h4 class="date">2022-07-28</h4>
+<h4 class="date">2022-08-02</h4>
 
 </div>
 
@@ -1513,70 +1513,74 @@ no parto.</p>
 <span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(parameter, method)) <span class="sc">|&gt;</span> </span>
 <span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span>
 <span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(cat_biv)</span></code></pre></div>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(cat_biv,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>             <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Variável&quot;</span>,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>                           <span class="st">&quot;Estatística&quot;</span>,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>                           <span class="st">&quot;p-valor&quot;</span>))</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
-<th align="left">variable</th>
-<th align="right">statistic</th>
-<th align="right">p.value</th>
+<th align="left">Variável</th>
+<th align="right">Estatística</th>
+<th align="right">p-valor</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">anemia_gest</td>
-<td align="right">1.2307907</td>
-<td align="right">0.2793603</td>
+<td align="right">1.231</td>
+<td align="right">0.279</td>
 </tr>
 <tr class="even">
 <td align="left">apoio_familiar</td>
-<td align="right">0.2217046</td>
-<td align="right">0.6636682</td>
+<td align="right">0.222</td>
+<td align="right">0.664</td>
 </tr>
 <tr class="odd">
 <td align="left">baixo_comp</td>
-<td align="right">3.1842330</td>
-<td align="right">0.0944528</td>
+<td align="right">3.184</td>
+<td align="right">0.094</td>
 </tr>
 <tr class="even">
 <td align="left">baixo_peso</td>
-<td align="right">2.5681040</td>
-<td align="right">0.1284358</td>
+<td align="right">2.568</td>
+<td align="right">0.128</td>
 </tr>
 <tr class="odd">
 <td align="left">cesarea</td>
-<td align="right">3.3744590</td>
-<td align="right">0.0739630</td>
+<td align="right">3.374</td>
+<td align="right">0.074</td>
 </tr>
 <tr class="even">
 <td align="left">hipert_materna</td>
-<td align="right">2.3535684</td>
-<td align="right">0.3118441</td>
+<td align="right">2.354</td>
+<td align="right">0.312</td>
 </tr>
 <tr class="odd">
 <td align="left">infec_gest</td>
-<td align="right">0.0250683</td>
-<td align="right">0.9100450</td>
+<td align="right">0.025</td>
+<td align="right">0.910</td>
 </tr>
 <tr class="even">
 <td align="left">paridade</td>
-<td align="right">11.3528407</td>
-<td align="right">0.0019990</td>
+<td align="right">11.353</td>
+<td align="right">0.002</td>
 </tr>
 <tr class="odd">
 <td align="left">parto_induzido</td>
-<td align="right">0.3622571</td>
-<td align="right">0.5997001</td>
+<td align="right">0.362</td>
+<td align="right">0.600</td>
 </tr>
 <tr class="even">
 <td align="left">rup_famil</td>
-<td align="right">1.7500616</td>
-<td align="right">0.2033983</td>
+<td align="right">1.750</td>
+<td align="right">0.203</td>
 </tr>
 <tr class="odd">
 <td align="left">tab_gest</td>
-<td align="right">16.7580475</td>
-<td align="right">0.0004998</td>
+<td align="right">16.758</td>
+<td align="right">0.000</td>
 </tr>
 </tbody>
 </table>
@@ -1590,22 +1594,22 @@ no parto.</p>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">group_by</span>(variable) <span class="sc">%&gt;%</span></span>
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">do</span>(<span class="fu">t.test</span>(.<span class="sc">$</span>value <span class="sc">~</span> .<span class="sc">$</span>tb_dic) <span class="sc">|&gt;</span></span>
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>                  broom<span class="sc">::</span><span class="fu">tidy</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(num_biv)</span></code></pre></div>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>method, <span class="sc">-</span>alternative)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(num_biv,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div>
 <table>
 <colgroup>
-<col width="11%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="18%" />
+<col width="16%" />
 <col width="9%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="8%" />
+<col width="10%" />
+<col width="9%" />
+<col width="10%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1618,75 +1622,63 @@ no parto.</p>
 <th align="right">parameter</th>
 <th align="right">conf.low</th>
 <th align="right">conf.high</th>
-<th align="left">method</th>
-<th align="left">alternative</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">escol_materna</td>
-<td align="right">1.1045157</td>
-<td align="right">6.925411</td>
-<td align="right">5.820895</td>
-<td align="right">5.862258</td>
-<td align="right">0.0000000</td>
-<td align="right">331.8287</td>
-<td align="right">0.7338845</td>
-<td align="right">1.4751469</td>
-<td align="left">Welch Two Sample t-test</td>
-<td align="left">two.sided</td>
+<td align="right">1.105</td>
+<td align="right">6.925</td>
+<td align="right">5.821</td>
+<td align="right">5.862</td>
+<td align="right">0.000</td>
+<td align="right">331.829</td>
+<td align="right">0.734</td>
+<td align="right">1.475</td>
 </tr>
 <tr class="even">
 <td align="left">escol_paterna</td>
-<td align="right">0.9118425</td>
-<td align="right">6.908111</td>
-<td align="right">5.996269</td>
-<td align="right">4.612423</td>
-<td align="right">0.0000058</td>
-<td align="right">318.6718</td>
-<td align="right">0.5228947</td>
-<td align="right">1.3007904</td>
-<td align="left">Welch Two Sample t-test</td>
-<td align="left">two.sided</td>
+<td align="right">0.912</td>
+<td align="right">6.908</td>
+<td align="right">5.996</td>
+<td align="right">4.612</td>
+<td align="right">0.000</td>
+<td align="right">318.672</td>
+<td align="right">0.523</td>
+<td align="right">1.301</td>
 </tr>
 <tr class="odd">
 <td align="left">idade_mae_num</td>
-<td align="right">0.9291002</td>
-<td align="right">26.119399</td>
-<td align="right">25.190299</td>
-<td align="right">2.321618</td>
-<td align="right">0.0209010</td>
-<td align="right">310.2277</td>
-<td align="right">0.1416603</td>
-<td align="right">1.7165402</td>
-<td align="left">Welch Two Sample t-test</td>
-<td align="left">two.sided</td>
+<td align="right">0.929</td>
+<td align="right">26.119</td>
+<td align="right">25.190</td>
+<td align="right">2.322</td>
+<td align="right">0.021</td>
+<td align="right">310.228</td>
+<td align="right">0.142</td>
+<td align="right">1.717</td>
 </tr>
 <tr class="even">
 <td align="left">per_cef</td>
-<td align="right">0.2786772</td>
-<td align="right">34.678304</td>
-<td align="right">34.399627</td>
-<td align="right">2.864368</td>
-<td align="right">0.0044626</td>
-<td align="right">311.0752</td>
-<td align="right">0.0872455</td>
-<td align="right">0.4701088</td>
-<td align="left">Welch Two Sample t-test</td>
-<td align="left">two.sided</td>
+<td align="right">0.279</td>
+<td align="right">34.678</td>
+<td align="right">34.400</td>
+<td align="right">2.864</td>
+<td align="right">0.004</td>
+<td align="right">311.075</td>
+<td align="right">0.087</td>
+<td align="right">0.470</td>
 </tr>
 <tr class="odd">
 <td align="left">renda_familiar</td>
-<td align="right">1.3563949</td>
-<td align="right">4.443335</td>
-<td align="right">3.086940</td>
-<td align="right">6.517750</td>
-<td align="right">0.0000000</td>
-<td align="right">462.0175</td>
-<td align="right">0.9474397</td>
-<td align="right">1.7653501</td>
-<td align="left">Welch Two Sample t-test</td>
-<td align="left">two.sided</td>
+<td align="right">1.356</td>
+<td align="right">4.443</td>
+<td align="right">3.087</td>
+<td align="right">6.518</td>
+<td align="right">0.000</td>
+<td align="right">462.018</td>
+<td align="right">0.947</td>
+<td align="right">1.765</td>
 </tr>
 </tbody>
 </table>
@@ -1743,18 +1735,12 @@ apresentaram um valor de p menor que 0,2 na análise bivariada
 <span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;Erro Padrão&quot;</span>,</span>
 <span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;Estatística&quot;</span>,</span>
 <span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;p-valor&quot;</span>),</span>
-<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">&quot;Resumo do modelo final com variáveis que apresentaram p-valor menor que 0,2 na análise bruta.&quot;</span></span>
-<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>        <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">&quot;Resumo do modelo final com variáveis que apresentaram p-valor menor que 0,2 na análise bruta.&quot;</span></span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
 <table>
 <caption>Resumo do modelo final com variáveis que apresentaram p-valor
 menor que 0,2 na análise bruta.</caption>
-<colgroup>
-<col width="37%" />
-<col width="15%" />
-<col width="16%" />
-<col width="16%" />
-<col width="13%" />
-</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Variável</th>
@@ -1767,80 +1753,80 @@ menor que 0,2 na análise bruta.</caption>
 <tbody>
 <tr class="odd">
 <td align="left">(Intercept)</td>
-<td align="right">0.5898459</td>
-<td align="right">1.6929402</td>
-<td align="right">0.3484151</td>
-<td align="right">0.7275285</td>
+<td align="right">0.590</td>
+<td align="right">1.693</td>
+<td align="right">0.348</td>
+<td align="right">0.728</td>
 </tr>
 <tr class="even">
 <td align="left">baixo_compSim</td>
-<td align="right">0.0872707</td>
-<td align="right">0.2073940</td>
-<td align="right">0.4207966</td>
-<td align="right">0.6739036</td>
+<td align="right">0.087</td>
+<td align="right">0.207</td>
+<td align="right">0.421</td>
+<td align="right">0.674</td>
 </tr>
 <tr class="odd">
 <td align="left">baixo_pesoSim</td>
-<td align="right">0.0138114</td>
-<td align="right">0.2579902</td>
-<td align="right">0.0535347</td>
-<td align="right">0.9573059</td>
+<td align="right">0.014</td>
+<td align="right">0.258</td>
+<td align="right">0.054</td>
+<td align="right">0.957</td>
 </tr>
 <tr class="even">
 <td align="left">cesareaSim</td>
-<td align="right">-0.0031668</td>
-<td align="right">0.1492984</td>
-<td align="right">-0.0212112</td>
-<td align="right">0.9830772</td>
+<td align="right">-0.003</td>
+<td align="right">0.149</td>
+<td align="right">-0.021</td>
+<td align="right">0.983</td>
 </tr>
 <tr class="odd">
 <td align="left">paridadeMaior ou igual a 4</td>
-<td align="right">0.6296262</td>
-<td align="right">0.2045008</td>
-<td align="right">3.0788454</td>
-<td align="right">0.0020780</td>
+<td align="right">0.630</td>
+<td align="right">0.205</td>
+<td align="right">3.079</td>
+<td align="right">0.002</td>
 </tr>
 <tr class="even">
 <td align="left">tab_gestSim</td>
-<td align="right">0.4085097</td>
-<td align="right">0.1417694</td>
-<td align="right">2.8815086</td>
-<td align="right">0.0039578</td>
+<td align="right">0.409</td>
+<td align="right">0.142</td>
+<td align="right">2.882</td>
+<td align="right">0.004</td>
 </tr>
 <tr class="odd">
 <td align="left">escol_materna</td>
-<td align="right">-0.0330671</td>
-<td align="right">0.0252031</td>
-<td align="right">-1.3120218</td>
-<td align="right">0.1895128</td>
+<td align="right">-0.033</td>
+<td align="right">0.025</td>
+<td align="right">-1.312</td>
+<td align="right">0.190</td>
 </tr>
 <tr class="even">
 <td align="left">escol_paterna</td>
-<td align="right">-0.0230685</td>
-<td align="right">0.0254590</td>
-<td align="right">-0.9061036</td>
-<td align="right">0.3648810</td>
+<td align="right">-0.023</td>
+<td align="right">0.025</td>
+<td align="right">-0.906</td>
+<td align="right">0.365</td>
 </tr>
 <tr class="odd">
 <td align="left">idade_mae_num</td>
-<td align="right">-0.0326153</td>
-<td align="right">0.0118664</td>
-<td align="right">-2.7485412</td>
-<td align="right">0.0059861</td>
+<td align="right">-0.033</td>
+<td align="right">0.012</td>
+<td align="right">-2.749</td>
+<td align="right">0.006</td>
 </tr>
 <tr class="even">
 <td align="left">per_cef</td>
-<td align="right">-0.0640476</td>
-<td align="right">0.0485989</td>
-<td align="right">-1.3178818</td>
-<td align="right">0.1875432</td>
+<td align="right">-0.064</td>
+<td align="right">0.049</td>
+<td align="right">-1.318</td>
+<td align="right">0.188</td>
 </tr>
 <tr class="odd">
 <td align="left">renda_familiar</td>
-<td align="right">-0.0331700</td>
-<td align="right">0.0223371</td>
-<td align="right">-1.4849694</td>
-<td align="right">0.1375519</td>
+<td align="right">-0.033</td>
+<td align="right">0.022</td>
+<td align="right">-1.485</td>
+<td align="right">0.138</td>
 </tr>
 </tbody>
 </table>
@@ -1871,23 +1857,27 @@ superior na razão de chances de 74,8.</p>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">variavel =</span> term,</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">or =</span> <span class="fu">exp</span>(estimate),</span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">lower_int =</span> x2_5_percent,</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">upper_int =</span> x97_5_percent</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">|&gt;</span> </span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Variável&quot;</span>,</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;Odds Ratio&quot;</span>,</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;Intervalo Inferior&quot;</span>,</span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;Intervalo Superior&quot;</span>),</span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">&quot;Razão de chances para cada variável incluída no modelo final.&quot;</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">upper_int =</span> x97_5_percent,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">pvalue =</span> p.value</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">|&gt;</span> </span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Variável&quot;</span>,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;Odds Ratio&quot;</span>,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;Intervalo Inferior&quot;</span>,</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;Intervalo Superior&quot;</span>,</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;p-valor&quot;</span>),</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">&quot;Razão de chances para cada variável incluída no modelo final.&quot;</span>,</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">digits =</span> <span class="dv">3</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
 <table>
 <caption>Razão de chances para cada variável incluída no modelo
 final.</caption>
 <colgroup>
-<col width="35%" />
-<col width="14%" />
-<col width="25%" />
-<col width="25%" />
+<col width="32%" />
+<col width="13%" />
+<col width="22%" />
+<col width="22%" />
+<col width="9%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1895,74 +1885,86 @@ final.</caption>
 <th align="right">Odds Ratio</th>
 <th align="right">Intervalo Inferior</th>
 <th align="right">Intervalo Superior</th>
+<th align="right">p-valor</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">(Intercept)</td>
-<td align="right">1.8037105</td>
-<td align="right">0.0647119</td>
-<td align="right">49.3214123</td>
+<td align="right">1.804</td>
+<td align="right">0.065</td>
+<td align="right">49.321</td>
+<td align="right">0.728</td>
 </tr>
 <tr class="even">
 <td align="left">baixo_compSim</td>
-<td align="right">1.0911920</td>
-<td align="right">0.7191404</td>
-<td align="right">1.6229454</td>
+<td align="right">1.091</td>
+<td align="right">0.719</td>
+<td align="right">1.623</td>
+<td align="right">0.674</td>
 </tr>
 <tr class="odd">
 <td align="left">baixo_pesoSim</td>
-<td align="right">1.0139072</td>
-<td align="right">0.6053057</td>
-<td align="right">1.6673408</td>
+<td align="right">1.014</td>
+<td align="right">0.605</td>
+<td align="right">1.667</td>
+<td align="right">0.957</td>
 </tr>
 <tr class="even">
 <td align="left">cesareaSim</td>
-<td align="right">0.9968382</td>
-<td align="right">0.7399461</td>
-<td align="right">1.3296305</td>
+<td align="right">0.997</td>
+<td align="right">0.740</td>
+<td align="right">1.330</td>
+<td align="right">0.983</td>
 </tr>
 <tr class="odd">
 <td align="left">paridadeMaior ou igual a 4</td>
-<td align="right">1.8769089</td>
-<td align="right">1.2492352</td>
-<td align="right">2.7886616</td>
+<td align="right">1.877</td>
+<td align="right">1.249</td>
+<td align="right">2.789</td>
+<td align="right">0.002</td>
 </tr>
 <tr class="even">
 <td align="left">tab_gestSim</td>
-<td align="right">1.5045738</td>
-<td align="right">1.1434634</td>
-<td align="right">1.9946624</td>
+<td align="right">1.505</td>
+<td align="right">1.143</td>
+<td align="right">1.995</td>
+<td align="right">0.004</td>
 </tr>
 <tr class="odd">
 <td align="left">escol_materna</td>
-<td align="right">0.9674737</td>
-<td align="right">0.9206418</td>
-<td align="right">1.0162407</td>
+<td align="right">0.967</td>
+<td align="right">0.921</td>
+<td align="right">1.016</td>
+<td align="right">0.190</td>
 </tr>
 <tr class="even">
 <td align="left">escol_paterna</td>
-<td align="right">0.9771956</td>
-<td align="right">0.9294314</td>
-<td align="right">1.0269803</td>
+<td align="right">0.977</td>
+<td align="right">0.929</td>
+<td align="right">1.027</td>
+<td align="right">0.365</td>
 </tr>
 <tr class="odd">
 <td align="left">idade_mae_num</td>
-<td align="right">0.9679109</td>
-<td align="right">0.9453861</td>
-<td align="right">0.9904253</td>
+<td align="right">0.968</td>
+<td align="right">0.945</td>
+<td align="right">0.990</td>
+<td align="right">0.006</td>
 </tr>
 <tr class="even">
 <td align="left">per_cef</td>
-<td align="right">0.9379603</td>
-<td align="right">0.8528632</td>
-<td align="right">1.0318353</td>
+<td align="right">0.938</td>
+<td align="right">0.853</td>
+<td align="right">1.032</td>
+<td align="right">0.188</td>
 </tr>
 <tr class="odd">
 <td align="left">renda_familiar</td>
-<td align="right">0.9673741</td>
-<td align="right">0.9218593</td>
-<td align="right">1.0057013</td>
+<td align="right">0.967</td>
+<td align="right">0.922</td>
+<td align="right">1.006</td>
+<td align="right">0.138</td>
 </tr>
 </tbody>
 </table>

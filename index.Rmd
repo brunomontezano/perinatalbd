@@ -510,7 +510,11 @@ cat_biv <- da_imp |>
     dplyr::select(-c(parameter, method)) |> 
     dplyr::ungroup()
 
-knitr::kable(cat_biv)
+knitr::kable(cat_biv,
+             digits = 3,
+             col.names = c("Variável",
+                           "Estatística",
+                           "p-valor"))
 ```
 
 ### Análise bivariada com variáveis numéricas
@@ -523,9 +527,11 @@ num_biv <- da_imp |>
     dplyr::group_by(variable) %>%
     dplyr::do(t.test(.$value ~ .$tb_dic) |>
                   broom::tidy()) |> 
-    dplyr::ungroup()
+    dplyr::ungroup() |> 
+    dplyr::select(-method, -alternative)
 
-knitr::kable(num_biv)
+knitr::kable(num_biv,
+             digits = 3)
 ```
 
 ### Análise multivariada
@@ -584,6 +590,7 @@ mod_filtrado_fit |>
                       "Erro Padrão",
                       "Estatística",
                       "p-valor"),
+        digits = 3,
         caption = "Resumo do modelo final com variáveis que apresentaram p-valor menor que 0,2 na análise bruta."
     )
 ```
@@ -615,14 +622,17 @@ mod_filtrado_fit |>
         variavel = term,
         or = exp(estimate),
         lower_int = x2_5_percent,
-        upper_int = x97_5_percent
+        upper_int = x97_5_percent,
+        pvalue = p.value
         ) |> 
     knitr::kable(
         col.names = c("Variável",
                       "Odds Ratio",
                       "Intervalo Inferior",
-                      "Intervalo Superior"),
-        caption = "Razão de chances para cada variável incluída no modelo final."
+                      "Intervalo Superior",
+                      "p-valor"),
+        caption = "Razão de chances para cada variável incluída no modelo final.",
+        digits = 3
     )
 
 # Criar plot com odds ratio listados acima
