@@ -212,8 +212,6 @@ respiratória no parto, malformação no parto e sofrimento fetal agrupadas
 -   `paridade`: Paridade (dicotômica) [4 ou mais e menos que 4]
 -   `apoio_familiar`: Teve apoio da famíla/vizinhos/amigos?
 -   `idade_mae_num`: Idade da mãe (numérica)
--   `idade_mae_20`: Idade da mãe (\< 20 anos)
--   `idade_mae_34`: Idade da mãe (\< 34 anos)
 -   `pretende_amamentar`: Mãe pretende amamentar
 -   `apgar_1`: Apgar no minuto 1 (escore bruto)
 -   `apgar_5`: Apgar no minuto 5 (escore bruto)
@@ -698,6 +696,47 @@ processed_or_table |>
     flextable::save_as_docx(path = "output/tabela_or.docx")
 ```
 
+```{r, eval = FALSE}
+# Criar plot com odds ratio, porém apenas variáveis significativas da bivariada
+plot_apenas_sig <- or_table |> 
+    dplyr::filter(variavel %in% c("paridadeMaior ou igual a 4", "tab_gestSim",
+                                  "escol_materna", "escol_paterna",
+                                  "idade_mae_num", "per_cef",
+                                  "renda_familiar")) |> 
+    ggplot2::ggplot() +
+    ggplot2::aes(x = or, y = variavel) +
+    ggplot2::geom_point(size = 5, color = "royalblue") +
+    ggplot2::geom_linerange(
+        ggplot2::aes(xmin = lower_int, xmax = upper_int),
+        color = "royalblue",
+        size = 0.8) +
+    ggplot2::geom_vline(xintercept = 1) +
+    ggplot2::scale_x_continuous(limits = c(0, 3)) +
+    ggplot2::scale_y_discrete(labels = c("Maternal education level",
+                                         "Paternal education level",
+                                         "Maternal age",
+                                         "Multiparity",
+                                         "Head circumference",
+                                         "Family income",
+                                         "Tobacco in pregnancy")) +
+    ggplot2::labs(x = "Adjusted OR",
+                  y = "Exposure") +
+    ggplot2::theme_minimal(base_size = 20) +
+    ggplot2::theme(
+        axis.text.x = ggplot2::element_text(size = 20),
+        axis.text.y = ggplot2::element_text(size = 20)
+        )
+
+ggplot2::ggsave(plot = plot_apenas_sig,
+                filename = "output/or_plot.png",
+                dpi = 300)
+
+ggplot2::ggsave(plot = plot_apenas_sig,
+                filename = "output/or_plot.pdf",
+                dpi = 300)
+```
+
+
 
 ## Tabela descritiva com dados perinatais
 
@@ -842,7 +881,9 @@ med_fit <- lavaan::sem(
     ordered = "tb_dic"
 )
 
-semTools::monteCarloCI(med_fit, nRep = 20000) |>
+mc_mediation_ci <- semTools::monteCarloCI(med_fit, nRep = 20000)
+
+mc_mediation_ci |>
     tibble::rownames_to_column("Efeito") |>
     dplyr::rename("Beta" = est,
                   "IC 2.5%" = ci.lower,
@@ -860,6 +901,46 @@ broom::tidy(med_fit, conf.int = TRUE) |>
                   "IC 97.5%" = conf.high,
                   "Beta_std" = std.all) |> 
     knitr::kable(caption = "Tabela com parâmetros do modelo de modelagem de equações estruturais e respectivos rótulos.", digits = 3, format = "html")
+```
+
+```{r, eval = FALSE}
+resumo_mediacao <- broom::tidy(med_fit, conf.int = TRUE) |> 
+    dplyr::select("Termo" = term,
+                  "Rótulo" = label,
+                  "Beta" = estimate,
+                  "Erro" = std.error,
+                  "p-valor" = p.value,
+                  "IC 2.5%" = conf.low,
+                  "IC 97.5%" = conf.high,
+                  "Beta_std" = std.all)
+
+resumo_mediacao |> 
+    dplyr::filter(Rótulo %in% c("indireto", "direto", "total")) |> 
+    dplyr::select(-Termo) |> 
+    dplyr::rename(B = Beta,
+                  "SE B" = Erro,
+                  pvalue = `p-valor`,
+                  beta = Beta_std,
+                  ic_lower = `IC 2.5%`,
+                  ic_upper = `IC 97.5%`
+                  ) |> 
+    dplyr::mutate(
+        dplyr::across(c(dplyr::starts_with("ic"), pvalue, B, beta, `SE B`),
+                      \(x) as.character(format(x, digits = 2))),
+        intervals = stringr::str_glue("({ic_lower}-{ic_upper})"),
+    ) |> 
+    dplyr::select(
+        Effect = Rótulo,
+        B,
+        intervals,
+        `SE B`,
+        beta,
+        pvalue
+    ) |> 
+    flextable::flextable() |> 
+    flextable::save_as_docx(path = "output/tabela_mediacao.docx")
+
+
 ```
 
 
