@@ -615,7 +615,7 @@ intervalos <- exp(confint(mod_filtrado_fit$fit)) |>
     janitor::clean_names()
 
 # Mostrar odds ratio com os respectivos intervalos de confiança
-mod_filtrado_fit |> 
+or_table <- mod_filtrado_fit |> 
     broom::tidy() |> 
     dplyr::left_join(intervalos, by = "term") |> 
     dplyr::transmute(
@@ -624,7 +624,9 @@ mod_filtrado_fit |>
         lower_int = x2_5_percent,
         upper_int = x97_5_percent,
         pvalue = p.value
-        ) |> 
+        )
+
+or_table |> 
     knitr::kable(
         col.names = c("Variável",
                       "Odds Ratio",
@@ -636,15 +638,7 @@ mod_filtrado_fit |>
     )
 
 # Criar plot com odds ratio listados acima
-mod_filtrado_fit |> 
-    broom::tidy() |> 
-    dplyr::left_join(intervalos, by = "term") |> 
-    dplyr::transmute(
-        variavel = term,
-        or = exp(estimate),
-        upper_int = x97_5_percent,
-        lower_int = x2_5_percent
-        ) |> 
+or_table |> 
     dplyr::filter(variavel != "(Intercept)") |> 
     ggplot2::ggplot() +
     ggplot2::aes(x = or, y = variavel) +
@@ -673,6 +667,37 @@ mod_filtrado_fit |>
         axis.text.y = ggplot2::element_text(size = 20)
         )
 ```
+
+```{r, eval = FALSE, warning = FALSE}
+# Tabela de odds ratio processada
+processed_or_table <- or_table |> 
+    dplyr::filter(variavel %in% c("paridadeMaior ou igual a 4", "tab_gestSim",
+                                  "escol_materna", "escol_paterna",
+                                  "idade_mae_num", "per_cef",
+                                  "renda_familiar")) |> 
+    dplyr::mutate(
+        dplyr::across(dplyr::ends_with("int"), \(x) as.character(format(x, digits = 2))),
+        intervals = stringr::str_glue("({lower_int}-{upper_int})"),
+        variavel = dplyr::case_when(
+            variavel == "paridadeMaior ou igual a 4" ~ "Parity",
+            variavel == "tab_gestSim" ~ "Tobbaco in pregnancy",
+            variavel == "escol_materna" ~ "Maternal years of education",
+            variavel == "escol_paterna" ~ "Paternal years of education",
+            variavel == "idade_mae_num" ~ "Maternal age",
+            variavel == "per_cef" ~ "Head circumference",
+            variavel == "renda_familiar" ~ "Family income"
+        ),
+        pvalue = format(pvalue, digits = 3)
+    ) |> 
+    dplyr::select(-dplyr::ends_with("int")) |> 
+    dplyr::select(variable = variavel, adjusted_or = or, intervals, pvalue)
+
+# Exportar tabela para Word
+processed_or_table |> 
+    flextable::flextable() |> 
+    flextable::save_as_docx(path = "output/tabela_or.docx")
+```
+
 
 ## Tabela descritiva com dados perinatais
 
@@ -727,9 +752,22 @@ tabela_peri |>
 
 # Gerar tabela descritiva com dados do follow-up
 tabela_follow <- dados_com_desfecho |> 
-    dplyr::rename(estado_civil = ld023a,
-                  anos_de_estudo = lescoljovemano) |> 
-    table1::table1(~ estado_civil + anos_de_estudo | outcome,
+    dplyr::rename(
+        cocaina_lifetime = ldc007, # Necessita recode
+        maconha_lifetime = ldc006, # Necessita recode
+        status_socio = labep3,
+        trabalha_atualmente = ld011,
+        sexo = sexonovo,
+        estado_civil = ld023a,
+        anos_de_estudo = lescoljovemano) |> 
+    dplyr::mutate(
+        dplyr::across(dplyr::ends_with("lifetime"),
+                      \(x) as.factor(dplyr::if_else(
+                          as.character(x) == "Nunca usei",
+                          "Não", "Sim"
+                      )))
+    ) |> 
+    table1::table1(~ sexo + status_socio + estado_civil + anos_de_estudo + trabalha_atualmente + maconha_lifetime + cocaina_lifetime | outcome,
                    data = _, # Placeholder do pipe nativo
                    extra.col = list("p-value" = pvalue),
                    overall = FALSE)
